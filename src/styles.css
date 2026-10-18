@@ -854,6 +854,13 @@ a.creator-name:focus-visible {
   letter-spacing: -0.02em;
 }
 
+.room-code {
+  font-family: var(--mono);
+  font-size: clamp(2rem, 8vw, 2.6rem);
+  letter-spacing: 0.18em;
+  margin: 4px 0 8px;
+}
+
 .pair-board {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -932,6 +939,8 @@ a.creator-name:focus-visible {
   background: var(--surface-2);
   padding: 8px 12px;
 }
+
+.roster .is-gone { opacity: 0.55; }
 
 @keyframes pop {
   from { transform: scale(0.96); }

@@ -1,4 +1,4 @@
-/** Deterministic generator for games and challenge links. */
+/** Deterministic generator for games, rooms, and challenge links. */
 
 export function mulberry32(seed: number): () => number {
   let state = seed >>> 0;
