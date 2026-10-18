@@ -58,6 +58,14 @@ workspace.id = 'workspace';
 const footer = el('footer', 'site-footer');
 const credit = el('p', 'footer-credit');
 credit.append(document.createTextNode('Built by '), creatorLink());
+const links = el('p', 'footer-links');
+links.append(
+  link('LinkedIn', 'https://www.linkedin.com/in/taha-ahsan-832475270/'),
+  el('span', undefined, ' · '),
+  link('GitHub', 'https://github.com/taha080'),
+);
+const contact = el('p', 'footer-links');
+contact.append(document.createTextNode('Contact: '), mailLink());
 const about = el('article', 'about-creator');
 about.append(
   el('h2', undefined, 'About the creator'),
@@ -73,9 +81,13 @@ aboutLinks.append(
   el('span', undefined, ' · '),
   link('GitHub', 'https://github.com/taha080'),
 );
-about.append(aboutLinks);
+const aboutContact = el('p', 'footer-links');
+aboutContact.append(document.createTextNode('Contact: '), mailLink());
+about.append(aboutLinks, aboutContact);
 footer.append(
   credit,
+  links,
+  contact,
   about,
   el('p', 'fine', 'A static portfolio project. Sequences and scores stay in this browser. Estimates are for teaching, not for a clinical design.'),
 );
@@ -159,6 +171,13 @@ function titleBlock(): HTMLElement {
 function creatorLink(): HTMLAnchorElement {
   const anchor = link('Taha Ahsan', 'https://www.linkedin.com/in/taha-ahsan-832475270/');
   anchor.className = 'creator-name';
+  return anchor;
+}
+
+function mailLink(): HTMLAnchorElement {
+  const anchor = link('ahsantaha16@gmail.com', 'mailto:ahsantaha16@gmail.com');
+  anchor.removeAttribute('target');
+  anchor.removeAttribute('rel');
   return anchor;
 }
 
