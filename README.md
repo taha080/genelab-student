@@ -20,7 +20,7 @@ The Pages site updates when `main` is built by GitHub Actions. Until that workfl
 - **Sequence tools.** FASTA parsing, reverse complement, base composition, restriction sites (EcoRI, BamHI, HindIII, NotI, XhoI, and other classroom enzymes), six-frame ORFs, and a short Needleman–Wunsch alignment.
 - **Biochemistry.** The 20 amino acids, an interactive Michaelis–Menten plot with a Lineweaver–Burk view, macromolecule overviews, all eight steps of the citric acid cycle, and gluconeogenesis from pyruvate to glucose.
 - **Games.** Codon rush, base-pair match, a Krebs-cycle order puzzle, enzyme match, and mutation detective. Scores and high scores stay in the same progress store as the quiz, and a few badges unlock from them.
-- **Study room.** A live quiz race over peer-to-peer WebRTC (PeerJS’s public broker only introduces the browsers; there is no API key and this site stores no room), pass-and-play for two to six people on one device, and a challenge link that encodes a quiz seed and a score.
+- **Study room.** Pass-and-play for two to six people on one device, and a challenge link that encodes a quiz seed and a score. Nothing is stored on a server.
 - **Quiz.** Thirty questions with an explanation after each answer. The score is saved in the progress dashboard.
 
 ![Amino acids and the start of the kinetics bench](docs/amino-acids.png)
@@ -53,7 +53,7 @@ These are the classroom models the code and tests lock in. They are for learning
 - **Gluconeogenesis.** Two pyruvate to one glucose costs 4 ATP + 2 GTP + 2 NADH. The four bypasses are pyruvate carboxylase, PEPCK, fructose-1,6-bisphosphatase, and glucose-6-phosphatase. The other enzymes are shared with glycolysis or shuttle oxaloacetate out of the mitochondrion as malate.
 - **Cori cycle.** Muscle nets 2 ATP turning glucose into two lactate. Liver spends 6 NTP (4 ATP + 2 GTP) to return one glucose. The organism’s net cost is 4 NTP.
 - **Games.** Codon rush uses the standard code for 45 seconds. Base-pair match accepts DNA A–T, DNA G–C, RNA A–U, and RNA G–C, and does not treat a DNA adenine as a match for uracil. The Krebs puzzle is the eight cycle enzymes, starting at citrate synthase. Enzyme match uses four cycle enzymes plus pyruvate carboxylase and fructose-1,6-bisphosphatase. Mutation detective classifies edits with the same rules as the mutation tool.
-- **Study room scoring.** A correct race answer is worth 60 points, plus up to 40 if it arrives quickly (100 at the instant the question opens, 60 after 10 seconds). A miss is 0. Pass-and-play gives each person different questions, so that total is not a shared challenge. A challenge link replays one shuffled list.
+- **Study room scoring.** A correct answer is worth 60 points, plus up to 40 if it arrives quickly (100 at the instant the question opens, 60 after 10 seconds). A miss is 0. Pass-and-play gives each person different questions, so that total is not a shared challenge. A challenge link replays one shuffled list.
 
 Sample sequences in the app are synthetic. None of them is a natural gene or a pathogen sequence.
 

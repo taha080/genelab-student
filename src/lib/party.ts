@@ -1,32 +1,12 @@
 /**
- * Study-room rules that do not need a network: room codes, race scoring,
- * the same-question deck, pass-and-play turns, and challenge links.
+ * Study-room rules that do not need a network: scoring, the shared question
+ * deck, pass-and-play turns, and challenge links.
  */
 import { QUESTIONS, type QuizQuestion } from './quiz';
 import { mulberry32, shuffle } from './random';
 
-export const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const RACE_LENGTH = 8;
 export const QUESTION_MS = 20_000;
-
-export function makeRoomCode(rng: () => number = Math.random): string {
-  let code = '';
-  for (let i = 0; i < 4; i += 1) {
-    code += ROOM_ALPHABET[Math.floor(rng() * ROOM_ALPHABET.length)] ?? 'A';
-  }
-  return code;
-}
-
-export function normalizeRoomCode(raw: string): string | null {
-  const cleaned = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (cleaned.length !== 4) return null;
-  if ([...cleaned].some((character) => !ROOM_ALPHABET.includes(character))) return null;
-  return cleaned;
-}
-
-export function peerIdForRoom(code: string): string {
-  return `gl${code.toLowerCase()}`;
-}
 
 export function sanitizeName(raw: string): string {
   const cleaned = raw.replace(/[\u0000-\u001F]/g, '').trim().slice(0, 16);
@@ -48,17 +28,6 @@ export interface BoardEntry {
 
 export function rankBoard(entries: readonly BoardEntry[]): BoardEntry[] {
   return [...entries].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
-}
-
-export interface Seat {
-  id: string;
-  connected: boolean;
-  answered: boolean;
-}
-
-/** Connected players who still owe an answer. A disconnected seat does not block the room. */
-export function waitingOn(seats: readonly Seat[]): string[] {
-  return seats.filter((seat) => seat.connected && !seat.answered).map((seat) => seat.id);
 }
 
 export function selectQuestions(seed: number, count = RACE_LENGTH): QuizQuestion[] {

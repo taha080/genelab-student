@@ -64,7 +64,7 @@ export const LESSONS: readonly Lesson[] = [
   { tool: 'biochem', title: 'Biochemistry', detail: 'Amino acids, enzyme kinetics, the citric acid cycle, and gluconeogenesis.' },
   { tool: 'quiz', title: 'Quiz', detail: 'Finish a quiz round.' },
   { tool: 'games', title: 'Games', detail: 'Play a round and keep a high score.' },
-  { tool: 'party', title: 'Study room', detail: 'Join a room, pass a device, or open a challenge link.' },
+  { tool: 'party', title: 'Study room', detail: 'Pass a device around, or open a challenge link.' },
 ];
 
 export const PROGRESS_KEY = 'genelab-progress';
@@ -199,7 +199,7 @@ export function badges(state: ProgressState): Badge[] {
     { id: 'krebs', title: 'Cycle order', detail: 'Place the citric acid cycle in order.', earned: state.games.some((attempt) => attempt.game === 'krebs') },
     { id: 'enzyme', title: 'Enzyme match', detail: 'Pair enzymes with their reactions.', earned: state.games.some((attempt) => attempt.game === 'enzyme') },
     { id: 'mutation', title: 'Detective', detail: 'Name a mutation from the sequence change.', earned: state.games.some((attempt) => attempt.game === 'mutation') },
-    { id: 'party', title: 'Study group', detail: 'Finish a room, a pass-and-play round, or a challenge.', earned: state.games.some((attempt) => attempt.game === 'party') },
+    { id: 'party', title: 'Study group', detail: 'Finish a pass-and-play round or a challenge.', earned: state.games.some((attempt) => attempt.game === 'party') },
     {
       id: 'high-score',
       title: 'High score',
