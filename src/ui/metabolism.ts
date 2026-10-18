@@ -22,8 +22,12 @@ import {
   type MetabolismLessonId,
   type PathStep,
 } from '../lib/metabolism';
+import { DIAGRAMS } from '../lib/diagrams';
+import type { MotionId } from '../lib/motion';
 import { bestLessonCheck, loadProgress, saveLessonCheck } from '../lib/progress';
+import { mountCinema } from './cinema';
 import { el } from './dom';
+import { mountFigures } from './figure';
 
 export function mountMetabolism(root: HTMLElement): () => void {
   const lessonId = lessonFromHash(location.hash);
@@ -37,8 +41,10 @@ export function mountMetabolism(root: HTMLElement): () => void {
   const nav = el('div', 'segment');
   nav.setAttribute('role', 'tablist');
   nav.setAttribute('aria-label', 'Metabolism lessons');
+  const gallery = el('div');
   const body = el('div');
-  root.append(nav, body);
+  root.append(nav, gallery, body);
+  let galleryLesson: MetabolismLessonId | '' = '';
 
   let playing = false;
   let timer = 0;
@@ -69,21 +75,31 @@ export function mountMetabolism(root: HTMLElement): () => void {
       button.setAttribute('aria-selected', String(on));
     }
     const lesson = metabolismLesson(lessonId) ?? METABOLISM_LESSONS[0]!;
-    body.replaceChildren(lessonView(lesson));
+    if (galleryLesson !== lesson.id) {
+      galleryLesson = lesson.id;
+      gallery.replaceChildren(lessonGallery(lesson));
+    }
+    body.replaceChildren(lessonBody(lesson));
   }
 
-  function lessonView(lesson: MetabolismLesson): HTMLElement {
+  function lessonGallery(lesson: MetabolismLesson): HTMLElement {
     const wrap = el('div');
     wrap.append(el('p', 'eyebrow', lesson.kicker), el('h3', undefined, lesson.title), el('p', undefined, lesson.summary));
+    wrap.append(mountFigures(DIAGRAMS[lesson.id]));
+    for (const id of lessonMotion(lesson.id)) wrap.append(mountCinema(id));
     if (lesson.id === 'intro') wrap.append(pathwayMap());
     if (lesson.id === 'glycolysis') wrap.append(glycolysisSummary());
     if (lesson.id === 'pentose') wrap.append(pentoseSummary());
     if (lesson.id === 'oxphos') wrap.append(oxphosSummary());
-    wrap.append(stepPlayer(lesson));
     if (lesson.id === 'atp') wrap.append(donorBench(), couplingNote());
     if (lesson.id === 'glycolysis') wrap.append(fatePanel());
     if (lesson.id === 'glycogenolysis') wrap.append(tissuePanel());
-    wrap.append(quizPanel(lesson));
+    return wrap;
+  }
+
+  function lessonBody(lesson: MetabolismLesson): HTMLElement {
+    const wrap = el('div');
+    wrap.append(stepPlayer(lesson), quizPanel(lesson));
     return wrap;
   }
 
@@ -456,6 +472,14 @@ function statChip(label: string, value: string): HTMLElement {
   const node = el('span', 'stat');
   node.append(el('span', 'stat-label', label), el('b', undefined, value));
   return node;
+}
+
+function lessonMotion(id: MetabolismLessonId): MotionId[] {
+  if (id === 'atp') return ['synthase'];
+  if (id === 'glycolysis') return ['glycolysis'];
+  if (id === 'glycogenolysis') return ['glycogen'];
+  if (id === 'oxphos') return ['etc', 'synthase'];
+  return [];
 }
 
 function shortLabel(id: MetabolismLessonId): string {

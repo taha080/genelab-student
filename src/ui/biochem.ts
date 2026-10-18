@@ -15,7 +15,10 @@ import {
   type AminoAcid,
   type SideChainGroup,
 } from '../lib/biochem';
+import { DIAGRAMS } from '../lib/diagrams';
+import { mountCinema } from './cinema';
 import { el } from './dom';
+import { mountFigures } from './figure';
 
 type Section = 'basics' | 'krebs' | 'glucose';
 
@@ -31,8 +34,10 @@ export function mountBiochem(root: HTMLElement): () => void {
   const nav = el('div', 'segment');
   nav.setAttribute('role', 'tablist');
   nav.setAttribute('aria-label', 'Biochemistry topics');
+  const gallery = el('div');
   const body = el('div');
-  root.append(nav, body);
+  root.append(nav, gallery, body);
+  let shownSection: Section | '' = '';
 
   let section: Section = initialBiochemSection();
   let group: SideChainGroup | 'all' = 'all';
@@ -74,6 +79,14 @@ export function mountBiochem(root: HTMLElement): () => void {
       const on = button.dataset.section === section;
       button.classList.toggle('on', on);
       button.setAttribute('aria-selected', String(on));
+    }
+    if (shownSection !== section) {
+      shownSection = section;
+      const block = el('div');
+      if (section === 'basics') block.append(mountFigures(DIAGRAMS.biochem));
+      else if (section === 'krebs') block.append(mountFigures(DIAGRAMS.krebs), mountCinema('krebs'));
+      else block.append(mountFigures(DIAGRAMS.glucose));
+      gallery.replaceChildren(block);
     }
     body.replaceChildren();
     if (section === 'basics') body.append(basics());

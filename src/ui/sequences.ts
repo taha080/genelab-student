@@ -8,7 +8,9 @@ import {
   sequenceStats,
   type FastaRecord,
 } from '../lib/seqtools';
+import { DIAGRAMS } from '../lib/diagrams';
 import { bases, cleanMessage, copyButton, el, formatPercent, sequenceField } from './dom';
+import { mountFigures } from './figure';
 
 const FASTA_SAMPLE = `>restriction demo\n${RESTRICTION_DEMO}\n>classroom gene\n${CLASSROOM_GENE}\n`;
 
@@ -19,6 +21,7 @@ export function mountSequences(root: HTMLElement): () => void {
       'explain',
       'Paste DNA or FASTA. This bench reverse-complements a record, counts bases, finds common restriction sites, lists open reading frames on all six frames, and aligns two sequences with a simple global score. Nothing is sent off this page.',
     ),
+    mountFigures(DIAGRAMS.sequences),
   );
 
   const primary = sequenceField('seq-primary', 'Sequence or FASTA', `>classroom gene\n${CLASSROOM_GENE}`, 6);

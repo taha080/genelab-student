@@ -2,7 +2,9 @@ import { AMINO_ACIDS } from '../lib/codon';
 import { interpretEdit, type EffectKind, type MutationKind, type MutationResult } from '../lib/mutation';
 import { CLASSROOM_GENE, SHORT_ORF } from '../lib/samples';
 import { cleanDna } from '../lib/sequence';
+import { DIAGRAMS } from '../lib/diagrams';
 import { bases, cleanMessage, el, labeled, sequenceField } from './dom';
+import { mountFigures } from './figure';
 
 const EFFECT_TONE: Record<EffectKind, string> = {
   unchanged: 'good',
@@ -33,6 +35,7 @@ export function mountMutations(root: HTMLElement): () => void {
       'explain',
       'Change one part of a coding sequence and see what happens to the protein. A new codon can encode the same amino acid (silent), a different one (missense), or a stop (nonsense). Adding or removing bases can also shift the reading frame. Positions count A, C, G, and T only.',
     ),
+    mountFigures(DIAGRAMS.mutations),
   );
 
   const sequence = sequenceField('mut-seq', 'Coding DNA, 5′ to 3′', CLASSROOM_GENE, 4);
