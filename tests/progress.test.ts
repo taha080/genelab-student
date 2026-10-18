@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   badges,
+  bestGame,
   bestQuiz,
   emptyProgress,
   loadProgress,
   markToolUsed,
+  recordGame,
   recordQuiz,
   resetProgress,
   saveProgress,
@@ -58,12 +60,27 @@ describe('progress tracker', () => {
 
   it('earns the bench badge only after every tool and a finished quiz', () => {
     let state = emptyProgress();
-    for (const tool of ['dogma', 'crispr', 'primers', 'mutations', 'codon', 'animation', 'sequences', 'biochem', 'quiz'] as const) {
+    for (const tool of ['dogma', 'crispr', 'primers', 'mutations', 'codon', 'animation', 'sequences', 'biochem', 'quiz', 'games', 'party'] as const) {
       state = markToolUsed(state, tool, '2026-01-01T00:00:00.000Z');
     }
     expect(badges(state).find((badge) => badge.id === 'complete')?.earned).toBe(false);
     state = recordQuiz(state, 10, 20, '2026-01-01T00:00:00.000Z');
     expect(badges(state).find((badge) => badge.id === 'complete')?.earned).toBe(true);
     expect(badges(state).find((badge) => badge.id === 'perfect')?.earned).toBe(false);
+  });
+
+  it('keeps game high scores and ignores an old save that has no game list', () => {
+    let state = recordGame(emptyProgress(), 'codon-rush', 40, '2026-01-01T00:00:00.000Z');
+    state = recordGame(state, 'codon-rush', 80, '2026-01-02T00:00:00.000Z');
+    expect(bestGame(state, 'codon-rush')).toBe(80);
+    expect(badges(state).find((badge) => badge.id === 'high-score')?.earned).toBe(true);
+    expect(badges(state).find((badge) => badge.id === 'codon-rush')?.earned).toBe(true);
+    const store = memory();
+    saveProgress(store, emptyProgress());
+    const raw = store.getItem('genelab-progress');
+    const parsed = JSON.parse(raw ?? '{}') as { games?: unknown };
+    delete parsed.games;
+    store.setItem('genelab-progress', JSON.stringify(parsed));
+    expect(loadProgress(store).games).toEqual([]);
   });
 });

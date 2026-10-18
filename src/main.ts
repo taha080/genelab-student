@@ -14,6 +14,8 @@ import { el } from './ui/dom';
 import { mountMutations } from './ui/mutations';
 import { mountPrimers } from './ui/primers';
 import { mountProgress } from './ui/progress';
+import { mountGames } from './ui/games';
+import { mountParty } from './ui/party';
 import { mountQuiz } from './ui/quiz';
 import { mountSequences } from './ui/sequences';
 
@@ -27,6 +29,8 @@ const TOOLS = [
   { id: 'animation', hash: 'animation', label: 'Animation', mount: mountAnimation },
   { id: 'sequences', hash: 'sequences', label: 'Sequences', mount: mountSequences },
   { id: 'biochem', hash: 'biochem', label: 'Biochemistry', mount: mountBiochem },
+  { id: 'games', hash: 'games', label: 'Games', mount: mountGames },
+  { id: 'party', hash: 'party', label: 'Study room', mount: mountParty },
   { id: 'quiz', hash: 'quiz', label: 'Quiz', mount: mountQuiz },
 ] as const;
 
@@ -52,18 +56,40 @@ tabs.setAttribute('aria-label', 'Tools');
 const workspace = el('main');
 workspace.id = 'workspace';
 const footer = el('footer', 'site-footer');
-const credit = el('p');
-credit.append(document.createTextNode('Built by '), link('Taha Ahsan', 'https://www.linkedin.com/in/taha-ahsan-832475270/'));
+const credit = el('p', 'footer-credit');
+credit.append(document.createTextNode('Built by '), creatorLink());
 const links = el('p', 'footer-links');
 links.append(
   link('LinkedIn', 'https://www.linkedin.com/in/taha-ahsan-832475270/'),
   el('span', undefined, ' · '),
   link('GitHub', 'https://github.com/taha080'),
 );
+const contact = el('p', 'footer-links');
+contact.append(document.createTextNode('Contact: '), mailLink());
+const about = el('article', 'about-creator');
+about.append(
+  el('h2', undefined, 'About the creator'),
+  el(
+    'p',
+    undefined,
+    'Taha Ahsan is a computer science graduate in Lahore, Pakistan. GeneLab is a static study bench for students.',
+  ),
+);
+const aboutLinks = el('p', 'footer-links');
+aboutLinks.append(
+  link('LinkedIn', 'https://www.linkedin.com/in/taha-ahsan-832475270/'),
+  el('span', undefined, ' · '),
+  link('GitHub', 'https://github.com/taha080'),
+);
+const aboutContact = el('p', 'footer-links');
+aboutContact.append(document.createTextNode('Contact: '), mailLink());
+about.append(aboutLinks, aboutContact);
 footer.append(
   credit,
   links,
-  el('p', 'fine', 'A static portfolio project. Sequences stay in this browser. Estimates are for teaching, not for a clinical design.'),
+  contact,
+  about,
+  el('p', 'fine', 'A static portfolio project. Sequences and scores stay in this browser. Estimates are for teaching, not for a clinical design.'),
 );
 
 shell.append(top, tabs, workspace, footer);
@@ -108,7 +134,8 @@ function show(id: ToolId) {
 }
 
 function toolFromHash(): ToolId {
-  const hash = location.hash.replace('#', '');
+  const hash = location.hash.replace(/^#/, '');
+  if (hash === 'party' || hash.startsWith('party/') || hash.startsWith('challenge/')) return 'party';
   return TOOLS.find((tool) => tool.hash === hash)?.id ?? 'dogma';
 }
 
@@ -135,8 +162,23 @@ function titleBlock(): HTMLElement {
   block.append(el('p', 'eyebrow', 'Student bench'));
   const heading = el('h1');
   heading.append(document.createTextNode('Gene'), el('span', undefined, 'Lab'));
-  block.append(heading, el('p', 'tagline', 'DNA, enzymes, and metabolism — worked through on one bench.'));
+  const credit = el('p', 'creator-line');
+  credit.append(document.createTextNode('Created by '), creatorLink());
+  block.append(heading, el('p', 'tagline', 'DNA, enzymes, and metabolism — worked through on one bench.'), credit);
   return block;
+}
+
+function creatorLink(): HTMLAnchorElement {
+  const anchor = link('Taha Ahsan', 'https://www.linkedin.com/in/taha-ahsan-832475270/');
+  anchor.className = 'creator-name';
+  return anchor;
+}
+
+function mailLink(): HTMLAnchorElement {
+  const anchor = link('ahsantaha16@gmail.com', 'mailto:ahsantaha16@gmail.com');
+  anchor.removeAttribute('target');
+  anchor.removeAttribute('rel');
+  return anchor;
 }
 
 function link(text: string, href: string): HTMLAnchorElement {

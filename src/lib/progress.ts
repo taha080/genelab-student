@@ -10,7 +10,19 @@ export const TRACKED_TOOLS = [
   'sequences',
   'biochem',
   'quiz',
+  'games',
+  'party',
 ] as const;
+
+export const GAME_IDS = ['codon-rush', 'base-pair', 'krebs', 'enzyme', 'mutation', 'party'] as const;
+
+export type GameId = (typeof GAME_IDS)[number];
+
+export interface GameAttempt {
+  game: GameId;
+  score: number;
+  at: string;
+}
 
 export type TrackedTool = (typeof TRACKED_TOOLS)[number];
 
@@ -25,6 +37,7 @@ export interface ProgressState {
   /** ISO time of the first visit, keyed by tool. */
   used: Partial<Record<TrackedTool, string>>;
   quizzes: QuizAttempt[];
+  games: GameAttempt[];
 }
 
 export interface Badge {
@@ -50,6 +63,8 @@ export const LESSONS: readonly Lesson[] = [
   { tool: 'sequences', title: 'Sequence tools', detail: 'Reverse-complement, cut, find an ORF, or align two sequences.' },
   { tool: 'biochem', title: 'Biochemistry', detail: 'Amino acids, enzyme kinetics, the citric acid cycle, and gluconeogenesis.' },
   { tool: 'quiz', title: 'Quiz', detail: 'Finish a quiz round.' },
+  { tool: 'games', title: 'Games', detail: 'Play a round and keep a high score.' },
+  { tool: 'party', title: 'Study room', detail: 'Pass a device around, or open a challenge link.' },
 ];
 
 export const PROGRESS_KEY = 'genelab-progress';
@@ -61,7 +76,11 @@ export interface KeyValueStore {
 }
 
 export function emptyProgress(): ProgressState {
-  return { version: 1, used: {}, quizzes: [] };
+  return { version: 1, used: {}, quizzes: [], games: [] };
+}
+
+function isGameId(value: unknown): value is GameId {
+  return typeof value === 'string' && (GAME_IDS as readonly string[]).includes(value);
 }
 
 export function loadProgress(store: KeyValueStore): ProgressState {
@@ -91,7 +110,19 @@ export function loadProgress(store: KeyValueStore): ProgressState {
         quizzes.push({ score, total, at });
       }
     }
-    return { version: 1, used, quizzes };
+    const games: GameAttempt[] = [];
+    if (Array.isArray(record.games)) {
+      for (const attempt of record.games) {
+        if (!attempt || typeof attempt !== 'object') continue;
+        const game = (attempt as GameAttempt).game;
+        const score = Number((attempt as GameAttempt).score);
+        const at = (attempt as GameAttempt).at;
+        if (!isGameId(game) || !Number.isInteger(score) || score < 0 || score > 100_000) continue;
+        if (typeof at !== 'string') continue;
+        games.push({ game, score, at });
+      }
+    }
+    return { version: 1, used, quizzes, games };
   } catch {
     return emptyProgress();
   }
@@ -111,6 +142,20 @@ export function recordQuiz(state: ProgressState, score: number, total: number, a
     return state;
   }
   return { ...state, quizzes: [...state.quizzes, { score, total, at }] };
+}
+
+export function recordGame(state: ProgressState, game: GameId, score: number, at: string): ProgressState {
+  if (!Number.isInteger(score) || score < 0 || score > 100_000) return state;
+  return { ...state, games: [...state.games, { game, score, at }] };
+}
+
+export function bestGame(state: ProgressState, game: GameId): number | null {
+  let best: number | null = null;
+  for (const attempt of state.games) {
+    if (attempt.game !== game) continue;
+    if (best === null || attempt.score > best) best = attempt.score;
+  }
+  return best;
 }
 
 export function bestQuiz(state: ProgressState): QuizAttempt | null {
@@ -148,6 +193,19 @@ export function badges(state: ProgressState): Badge[] {
     { id: 'sequences', title: 'Sequence bench', detail: 'Open the sequence tools.', earned: used('sequences') },
     { id: 'biochem', title: 'Metabolism', detail: 'Open the biochemistry bench.', earned: used('biochem') },
     { id: 'quiz', title: 'Quiz taken', detail: 'Finish one quiz.', earned: state.quizzes.length > 0 },
+    { id: 'games', title: 'Player', detail: 'Finish any game.', earned: state.games.some((attempt) => attempt.game !== 'party') },
+    { id: 'codon-rush', title: 'Codon rush', detail: 'Translate codons against the clock.', earned: state.games.some((attempt) => attempt.game === 'codon-rush') },
+    { id: 'base-pair', title: 'Base pairs', detail: 'Match A–T, G–C, and A–U.', earned: state.games.some((attempt) => attempt.game === 'base-pair') },
+    { id: 'krebs', title: 'Cycle order', detail: 'Place the citric acid cycle in order.', earned: state.games.some((attempt) => attempt.game === 'krebs') },
+    { id: 'enzyme', title: 'Enzyme match', detail: 'Pair enzymes with their reactions.', earned: state.games.some((attempt) => attempt.game === 'enzyme') },
+    { id: 'mutation', title: 'Detective', detail: 'Name a mutation from the sequence change.', earned: state.games.some((attempt) => attempt.game === 'mutation') },
+    { id: 'party', title: 'Study group', detail: 'Finish a pass-and-play round or a challenge.', earned: state.games.some((attempt) => attempt.game === 'party') },
+    {
+      id: 'high-score',
+      title: 'High score',
+      detail: 'Score 80 or more in any game.',
+      earned: state.games.some((attempt) => attempt.game !== 'party' && attempt.score >= 80),
+    },
     { id: 'perfect', title: 'Full marks', detail: 'Answer every question in a round.', earned: perfect },
     {
       id: 'complete',
@@ -167,6 +225,13 @@ export function touchTool(store: KeyValueStore, tool: TrackedTool, at = new Date
 
 export function saveQuizScore(store: KeyValueStore, score: number, total: number, at = new Date().toISOString()): ProgressState {
   const next = recordQuiz(markToolUsed(loadProgress(store), 'quiz', at), score, total, at);
+  saveProgress(store, next);
+  return next;
+}
+
+export function saveGameScore(store: KeyValueStore, game: GameId, score: number, at = new Date().toISOString()): ProgressState {
+  const tool: TrackedTool = game === 'party' ? 'party' : 'games';
+  const next = recordGame(markToolUsed(loadProgress(store), tool, at), game, score, at);
   saveProgress(store, next);
   return next;
 }
