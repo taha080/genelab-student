@@ -20,7 +20,7 @@ The Pages site updates when `main` is built by GitHub Actions. Until that workfl
 - **Sequence tools.** FASTA parsing, reverse complement, base composition, restriction sites (EcoRI, BamHI, HindIII, NotI, XhoI, and other classroom enzymes), six-frame ORFs, and a short Needleman–Wunsch alignment.
 - **Biochemistry.** The 20 amino acids, an interactive Michaelis–Menten plot with a Lineweaver–Burk view, macromolecule overviews, all eight steps of the citric acid cycle, and gluconeogenesis from pyruvate to glucose.
 - **Games.** Codon rush, base-pair match, a Krebs-cycle order puzzle, enzyme match, and mutation detective. Scores and high scores stay in the same progress store as the quiz, and a few badges unlock from them.
-- **Study room.** A live quiz race over peer-to-peer WebRTC (PeerJS’s public broker only introduces the browsers; there is no API key and this site stores no room), pass-and-play for two to six people on one device, and a challenge link that encodes a quiz seed and a score.
+- **Study room.** A live quiz race over peer-to-peer WebRTC (PeerJS’s public broker only introduces the browsers; there is no API key and this site stores no room), pass-and-play for two to six people on one device, and a challenge link that encodes a quiz seed and a score. Voice in a live room is optional and uses the same peer connection. The microphone starts only after Join voice, for up to six people. Mute, a per-person volume, and a speaking indicator stay in the browser. If the mic is blocked, the quiz continues.
 - **Quiz.** Thirty questions with an explanation after each answer. The score is saved in the progress dashboard.
 
 ![Amino acids and the start of the kinetics bench](docs/amino-acids.png)

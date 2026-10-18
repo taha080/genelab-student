@@ -17,7 +17,9 @@ import {
 } from '../lib/party';
 import { saveGameScore } from '../lib/progress';
 import type { QuizQuestion } from '../lib/quiz';
+import { VOICE_LIMIT, roomHasVoiceSlot, voiceStatus } from '../lib/voice';
 import { el } from './dom';
+import { VoiceMesh } from './voice';
 
 type Mode = 'live' | 'pass' | 'challenge';
 
@@ -29,12 +31,14 @@ interface PlayerState {
   answered: boolean;
   choice: number | null;
   pending: number;
+  voice: boolean;
+  muted: boolean;
 }
 
 interface RoomView {
   t: 'room';
   phase: 'lobby' | 'question' | 'reveal' | 'done';
-  players: { id: string; name: string; score: number; connected: boolean }[];
+  players: { id: string; name: string; score: number; connected: boolean; voice?: boolean; muted?: boolean }[];
   index: number;
   total: number;
   prompt: string;
@@ -46,7 +50,10 @@ interface RoomView {
   hostId: string;
 }
 
-type ClientMessage = { t: 'hello'; name: string } | { t: 'answer'; index: number; choice: number; ms: number };
+type ClientMessage =
+  | { t: 'hello'; name: string }
+  | { t: 'answer'; index: number; choice: number; ms: number }
+  | { t: 'voice'; on: boolean; muted: boolean };
 
 export function mountParty(root: HTMLElement): () => void {
   const route = readRoute();
@@ -54,7 +61,7 @@ export function mountParty(root: HTMLElement): () => void {
     el(
       'p',
       'explain',
-      'Study together without an account. A live room uses peer-to-peer WebRTC. The public PeerJS broker only introduces the browsers, and this site stores no room. If the network is unavailable, pass one device around, or share a challenge link that carries a quiz seed and a score.',
+      'Study together without an account. A live room uses peer-to-peer WebRTC. Voice is optional: the microphone stays off until you tap Join voice, and the quiz works without it. The public PeerJS broker only introduces the browsers, and this site stores no room. If the network is unavailable, pass one device around, or share a challenge link that carries a quiz seed and a score.',
     ),
   );
   const nav = el('div', 'segment');
@@ -109,9 +116,16 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
   let code = preset;
   let startedAt = 0;
   let closed = '';
+  let voiceNote = '';
+  let lastView: RoomView | null = null;
+  let painting = false;
+  const voice = new VoiceMesh({
+    onChange: () => refreshVoiceFaces(),
+  });
 
   function destroy() {
     window.clearTimeout(timer);
+    voice.destroy();
     guestConn?.close();
     guestConn = null;
     for (const conn of conns.values()) conn.close();
@@ -135,7 +149,14 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
     return {
       t: 'room',
       phase,
-      players: players.map((item) => ({ id: item.id, name: item.name, score: item.score, connected: item.connected })),
+      players: players.map((item) => ({
+        id: item.id,
+        name: item.name,
+        score: item.score,
+        connected: item.connected,
+        voice: item.voice,
+        muted: item.muted,
+      })),
       index,
       total: questions.length,
       prompt: phase === 'lobby' ? '' : (question?.prompt ?? ''),
@@ -236,8 +257,20 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
         found.connected = true;
         found.name = name;
       } else {
-        players.push({ id, name, score: 0, connected: true, answered: false, choice: null, pending: 0 });
+        players.push({ id, name, score: 0, connected: true, answered: false, choice: null, pending: 0, voice: false, muted: false });
       }
+      broadcast();
+      return;
+    }
+    if (message.t === 'voice') {
+      const player = players.find((item) => item.id === id);
+      if (!player || !player.connected) return;
+      if (message.on && !player.voice && !roomHasVoiceSlot(players.filter((item) => item.voice && item.connected).length, false)) {
+        broadcast();
+        return;
+      }
+      player.voice = message.on;
+      player.muted = message.on && message.muted;
       broadcast();
       return;
     }
@@ -254,8 +287,9 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
     panel.replaceChildren(el('p', undefined, 'Opening the room…'));
     peer.on('open', (id) => {
       selfId = id;
-      players = [{ id, name, score: 0, connected: true, answered: false, choice: null, pending: 0 }];
+      players = [{ id, name, score: 0, connected: true, answered: false, choice: null, pending: 0, voice: false, muted: false }];
       phase = 'lobby';
+      if (peer) voice.attach(peer, id);
       broadcast();
     });
     peer.on('connection', (conn) => {
@@ -283,7 +317,11 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
 
   function drop(id: string) {
     const player = players.find((item) => item.id === id);
-    if (player) player.connected = false;
+    if (player) {
+      player.connected = false;
+      player.voice = false;
+      player.muted = false;
+    }
     conns.delete(id);
     if (phase === 'question' && waitingOn(players).length === 0) reveal();
     else broadcast();
@@ -299,6 +337,7 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
     panel.replaceChildren(el('p', undefined, `Joining room ${roomCode}…`));
     peer.on('open', (id) => {
       selfId = id;
+      if (peer) voice.attach(peer, id);
       guestConn = peer?.connect(peerIdForRoom(roomCode), { reliable: true }) ?? null;
       guestConn?.on('open', () => guestConn?.send({ t: 'hello', name } satisfies ClientMessage));
       guestConn?.on('data', (data) => {
@@ -350,12 +389,168 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
     panel.append(name.label, join.label, row);
   }
 
+  function publishVoice() {
+    const on = voice.joined;
+    const muted = on && voice.muted;
+    if (host) {
+      const me = players.find((player) => player.id === selfId);
+      if (me) {
+        if (on && !me.voice && !roomHasVoiceSlot(players.filter((player) => player.voice && player.connected).length, false)) {
+          voice.leave();
+          voiceNote = `Voice is full (${VOICE_LIMIT} people). The quiz still works without it.`;
+          broadcast();
+          return;
+        }
+        me.voice = on;
+        me.muted = muted;
+      }
+      broadcast();
+      return;
+    }
+    guestConn?.send({ t: 'voice', on, muted } satisfies ClientMessage);
+    if (lastView) paint(lastView);
+  }
+
+  function refreshVoiceFaces() {
+    for (const row of panel.querySelectorAll<HTMLElement>('[data-player]')) {
+      const id = row.dataset.player ?? '';
+      const player = lastView?.players.find((item) => item.id === id);
+      if (!player) continue;
+      const status = voiceLabel(player);
+      row.classList.toggle('is-speaking', status === 'Speaking');
+      const meta = row.querySelector('.voice-meta');
+      if (meta) meta.textContent = player.connected ? `${player.score} · ${status}` : 'left';
+    }
+    if (voice.needGesture && !panel.querySelector('[data-hear]') && lastView) paint(lastView);
+  }
+
+  function voiceBar(): HTMLElement {
+    const bar = el('div', 'voice-bar');
+    const others = lastView?.players.filter((player) => player.voice && player.connected && player.id !== selfId).length ?? 0;
+    if (!voice.joined) {
+      const join = el('button', 'ghost', 'Join voice');
+      join.type = 'button';
+      const open = roomHasVoiceSlot(others, false);
+      join.disabled = !open;
+      join.addEventListener('click', () => {
+        void voice.join().then((ok) => {
+          if (ok) {
+            voiceNote = '';
+            publishVoice();
+          } else if (lastView) paint(lastView);
+        });
+      });
+      bar.append(join);
+      bar.append(el('p', 'caption', open
+        ? 'The microphone stays off until you tap Join voice. A phone may ask for a second tap before you can hear the room.'
+        : `Voice is full (${VOICE_LIMIT} people). The quiz still works without it.`));
+    } else {
+      const mute = el('button', 'ghost', voice.muted ? 'Unmute' : 'Mute');
+      mute.type = 'button';
+      mute.addEventListener('click', () => {
+        voice.setMuted(!voice.muted);
+        publishVoice();
+      });
+      const leave = el('button', 'ghost', 'Leave voice');
+      leave.type = 'button';
+      leave.addEventListener('click', () => {
+        voice.leave();
+        voiceNote = '';
+        publishVoice();
+      });
+      bar.append(mute, leave);
+      bar.append(el('p', 'caption', voice.muted ? 'Your microphone is muted. The quiz is unchanged.' : 'You are in voice. Mute yourself any time. The quiz does not need the microphone.'));
+    }
+    if (voice.denied) bar.append(el('p', 'banner caution', voice.denied));
+    if (voiceNote) bar.append(el('p', 'banner caution', voiceNote));
+    if (voice.needGesture) {
+      const hear = el('button', 'primary', 'Tap to hear');
+      hear.type = 'button';
+      hear.dataset.hear = '1';
+      hear.addEventListener('click', () => {
+        voice.hear();
+        if (lastView) paint(lastView);
+      });
+      bar.append(hear);
+    }
+    return bar;
+  }
+
+  function personVolume(id: string, name: string): HTMLElement {
+    const wrap = el('span', 'voice-person');
+    const range = el('input');
+    range.type = 'range';
+    range.min = '0';
+    range.max = '1';
+    range.step = '0.05';
+    range.value = String(voice.volume(id));
+    range.setAttribute('aria-label', `Volume for ${name}`);
+    range.addEventListener('input', () => voice.setVolume(id, Number(range.value)));
+    const quiet = el('button', 'ghost tiny', voice.isSilenced(id) ? 'Hear' : 'Mute them');
+    quiet.type = 'button';
+    quiet.addEventListener('click', () => {
+      voice.setSilenced(id, !voice.isSilenced(id));
+      quiet.textContent = voice.isSilenced(id) ? 'Hear' : 'Mute them';
+    });
+    wrap.append(range, quiet);
+    return wrap;
+  }
+
+  function liveRoster(group: RoomView['players']): HTMLElement {
+    const list = el('ul', 'roster');
+    for (const ranked of rankBoard(group)) {
+      const player = group.find((item) => item.id === ranked.id);
+      if (!player) continue;
+      const row = el('li', player.connected ? undefined : 'is-gone');
+      row.dataset.player = player.id;
+      const status = voiceLabel(player);
+      if (status === 'Speaking') row.classList.add('is-speaking');
+      row.append(el('strong', undefined, player.name));
+      row.append(el('span', 'voice-meta', player.connected ? `${player.score} · ${status}` : 'left'));
+      const inVoice = player.id === selfId ? voice.joined : player.voice === true;
+      if (player.connected && inVoice && player.id !== selfId) row.append(personVolume(player.id, player.name));
+      list.append(row);
+    }
+    return list;
+  }
+
+  function voiceLabel(player: RoomView['players'][number]): string {
+    const self = player.id === selfId;
+    const inVoice = self ? voice.joined : player.voice === true;
+    const muted = self ? voice.joined && voice.muted : player.muted === true;
+    return voiceStatus({
+      inVoice,
+      muted,
+      speaking: inVoice && !muted && voice.isSpeaking(player.id),
+      unreachable: inVoice && !self && voice.isUnreachable(player.id),
+    });
+  }
+
   function paint(view: RoomView) {
+    lastView = view;
+    if (painting) return;
+    painting = true;
+    try {
+      paintRoom(view);
+    } finally {
+      painting = false;
+    }
+  }
+
+  function paintRoom(view: RoomView) {
+    const othersInVoice = view.players.filter((player) => player.voice && player.connected && player.id !== selfId).length;
+    const me = view.players.find((player) => player.id === selfId);
+    if (voice.joined && me && me.voice !== true && othersInVoice >= VOICE_LIMIT) {
+      voice.leave();
+      voiceNote = `Voice is full (${VOICE_LIMIT} people). The quiz still works without it.`;
+    }
+    voice.sync(view.players.filter((player) => (player.id === selfId ? voice.joined : player.voice) && player.connected).map((player) => player.id));
     panel.replaceChildren();
     const here = view.players.filter((player) => player.connected).length;
     const role = host ? 'You are the host.' : 'You joined this room.';
     const phaseNote = view.phase === 'done' ? `Race finished. ${here} still connected.` : `Connected. ${role} ${here} ${here === 1 ? 'person is' : 'people are'} here.`;
     panel.append(statusNote(closed || phaseNote, closed ? 'caution' : 'good'));
+    panel.append(voiceBar());
     if (view.phase === 'lobby') {
       panel.append(el('p', 'eyebrow', 'Room'), el('p', 'room-code', code), el('p', undefined, host ? 'Share this code. You start the race when everyone is here.' : 'Waiting for the host to start.'));
       const link = el('button', 'ghost tiny', 'Copy join link');
@@ -366,7 +561,7 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
         void navigator.clipboard?.writeText(url.toString());
         link.textContent = 'Copied';
       });
-      panel.append(link, roster(view.players));
+      panel.append(link, liveRoster(view.players));
       if (host) {
         const start = el('button', 'primary', 'Start race');
         start.type = 'button';
@@ -377,7 +572,7 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
     }
     if (view.phase === 'done') {
       const mine = view.players.find((player) => player.id === selfId)?.score ?? 0;
-      panel.append(el('h3', undefined, 'Leaderboard'), board(view.players), challengeButton(view.seed, mine, view.total));
+      panel.append(el('h3', undefined, 'Leaderboard'), liveRoster(view.players), challengeButton(view.seed, mine, view.total));
       return;
     }
     const question = el('div');
@@ -400,7 +595,7 @@ function mountLive(stage: HTMLElement, preset: string): () => void {
       });
       choices.append(button);
     });
-    panel.append(question, choices, roster(view.players));
+    panel.append(question, choices, liveRoster(view.players));
     if (view.phase === 'question' && view.yourAnswer !== null) {
       panel.append(el('p', 'caption', 'Answer locked. The question reveals when everyone still connected has answered, or when 20 seconds run out.'));
     }
@@ -665,7 +860,7 @@ function statusNote(text: string, tone: 'good' | 'caution' | 'idle'): HTMLElemen
 
 function roster(players: RoomView['players']): HTMLElement {
   const list = el('ul', 'roster');
-  for (const player of rankBoard(players.map((item) => ({ ...item })))) {
+  for (const player of rankBoard(players)) {
     const row = el('li', player.connected ? undefined : 'is-gone');
     row.append(el('strong', undefined, player.name), el('span', undefined, player.connected ? `${player.score}` : 'left'));
     list.append(row);
@@ -723,8 +918,11 @@ function parseRoom(data: unknown): RoomView | null {
 function parseClient(data: unknown): ClientMessage | null {
   if (!data || typeof data !== 'object') return null;
   const message = data as Partial<ClientMessage>;
-  if (message.t === 'hello' && typeof message.name === 'string') return { t: 'hello', name: message.name };
-  if (message.t === 'answer' && typeof message.index === 'number' && typeof message.choice === 'number' && typeof message.ms === 'number') {
+    if (message.t === 'hello' && typeof message.name === 'string') return { t: 'hello', name: message.name };
+    if (message.t === 'voice' && typeof message.on === 'boolean' && typeof message.muted === 'boolean') {
+      return { t: 'voice', on: message.on, muted: message.muted };
+    }
+    if (message.t === 'answer' && typeof message.index === 'number' && typeof message.choice === 'number' && typeof message.ms === 'number') {
     return { t: 'answer', index: message.index, choice: message.choice, ms: message.ms };
   }
   return null;
