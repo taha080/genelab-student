@@ -3,6 +3,9 @@ import {
   challengeHash,
   decodeChallenge,
   encodeChallenge,
+  inviteUrl,
+  joinError,
+  loadNickname,
   makeRoomCode,
   normalizeRoomCode,
   passTurns,
@@ -11,6 +14,7 @@ import {
   rankBoard,
   sanitizeName,
   selectQuestions,
+  shouldRetryJoin,
   waitingOn,
 } from '../src/lib/party';
 import { QUESTIONS } from '../src/lib/quiz';
@@ -65,5 +69,21 @@ describe('study room rules', () => {
     expect(decodeChallenge(encoded ?? '')).toEqual({ seed: 42, score: 480, total: 8 });
     expect(decodeChallenge('not a link')).toBeNull();
     expect(challengeHash({ seed: 42, score: 480, total: 8 })).toBe(`#challenge/${encoded}`);
+  });
+
+  it('remembers a nickname, retries a dropped join, and builds an invite link', () => {
+    expect(loadNickname('  Ali  ')).toBe('Ali');
+    expect(loadNickname(null, () => 0)).toBe('Sunny Cell');
+    expect(loadNickname('   ', () => 0)).toBe('Sunny Cell');
+    expect(sanitizeName(`${'A'.repeat(40)}`)).toHaveLength(16);
+    expect(sanitizeName('<b>Ali</b>')).toBe('<b>Ali</b>');
+    expect(shouldRetryJoin(0)).toBe(true);
+    expect(shouldRetryJoin(2)).toBe(true);
+    expect(shouldRetryJoin(3)).toBe(false);
+    expect(shouldRetryJoin(-1)).toBe(false);
+    expect(joinError('peer-unavailable')).toMatch(/Retry/);
+    expect(joinError('dropped')).toMatch(/Retry/);
+    expect(inviteUrl('https://example.test/genelab/', 'ab23')).toBe('https://example.test/genelab/#party/ab23');
+    expect(normalizeRoomCode(' ab23 ')).toBe('AB23');
   });
 });
