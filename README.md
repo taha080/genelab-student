@@ -6,6 +6,8 @@ A static classroom bench for high school and early university biology. DNA stays
 
 The Pages site updates when `main` is built by GitHub Actions. Until that workflow has run on `main`, the link is the address the site will use.
 
+![Central dogma explorer](docs/central-dogma.png)
+
 ## Features
 
 - **Progress.** Tools you open, quiz scores, best score, and completion badges stay in `localStorage` on this machine. Reset is two clicks.
@@ -18,6 +20,12 @@ The Pages site updates when `main` is built by GitHub Actions. Until that workfl
 - **Sequence tools.** FASTA parsing, reverse complement, base composition, restriction sites (EcoRI, BamHI, HindIII, NotI, XhoI, and other classroom enzymes), six-frame ORFs, and a short Needleman–Wunsch alignment.
 - **Biochemistry.** The 20 amino acids, an interactive Michaelis–Menten plot with a Lineweaver–Burk view, macromolecule overviews, all eight steps of the citric acid cycle, and gluconeogenesis from pyruvate to glucose.
 - **Quiz.** Thirty questions with an explanation after each answer. The score is saved in the progress dashboard.
+
+![Amino acids and the start of the kinetics bench](docs/amino-acids.png)
+
+![Citric acid cycle at α-ketoglutarate dehydrogenase: 1 NADH and 1 CO₂](docs/krebs-cycle.png)
+
+![Gluconeogenesis, with the four bypass enzymes marked](docs/gluconeogenesis.png)
 
 ## Run it locally
 
