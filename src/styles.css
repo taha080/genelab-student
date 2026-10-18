@@ -1252,7 +1252,9 @@ a.creator-name:focus-visible {
 .edu-svg {
   display: block;
   width: 100%;
+  max-width: 640px;
   height: auto;
+  margin-inline: auto;
   color: var(--ink);
   font-family: var(--sans);
 }
@@ -1316,7 +1318,9 @@ gene-cinema.cinema {
 .cinema-svg {
   display: block;
   width: 100%;
+  max-width: 720px;
   height: auto;
+  margin-inline: auto;
   color: var(--ink);
   font-family: var(--sans);
 }
