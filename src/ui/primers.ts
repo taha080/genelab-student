@@ -1,6 +1,8 @@
 import { analyzePair, analyzePrimer, type PrimerReport } from '../lib/primer';
 import { HAIRPIN_PRIMER, MATCHED_FORWARD, MATCHED_REVERSE, UNEVEN_FORWARD, UNEVEN_REVERSE } from '../lib/samples';
+import { DIAGRAMS } from '../lib/diagrams';
 import { bases, el, formatC, formatPercent, labeled, noteList, sequenceField, stat } from './dom';
+import { mountFigures } from './figure';
 
 export function mountPrimers(root: HTMLElement): () => void {
   root.append(
@@ -9,6 +11,7 @@ export function mountPrimers(root: HTMLElement): () => void {
       'explain',
       'A PCR primer is a short DNA strand that binds where you want copying to start. Melting temperature (Tm) is an estimate of where that duplex comes apart. Compare the two primers, and watch for ends that can stick to each other.',
     ),
+    mountFigures(DIAGRAMS.primers),
   );
 
   const forward = sequenceField('primer-f', 'Forward primer, 5′ to 3′', MATCHED_FORWARD, 2);

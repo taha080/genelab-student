@@ -1,7 +1,9 @@
 import { findGuides, worstLevel, type GuideSite } from '../lib/crispr';
 import { CLASSROOM_GENE, PAM_MINUS, PAM_PLUS } from '../lib/samples';
 import { cleanDna } from '../lib/sequence';
+import { DIAGRAMS } from '../lib/diagrams';
 import { bases, cleanMessage, copyButton, el, formatPercent, sequenceField, stat } from './dom';
+import { mountFigures } from './figure';
 
 const MAX = 3000;
 
@@ -12,6 +14,7 @@ export function mountCrispr(root: HTMLElement): () => void {
       'explain',
       'SpCas9 cuts beside the letters NGG, called a PAM. The guide is the 20 bases on the 5′ side of that PAM. This list reads both strands of the sequence you paste. It does not check whether the same 20 bases occur elsewhere in a genome.',
     ),
+    mountFigures(DIAGRAMS.crispr),
   );
 
   const { label, area } = sequenceField('crispr-seq', 'Target DNA', CLASSROOM_GENE, 4);

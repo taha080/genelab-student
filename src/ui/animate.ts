@@ -1,7 +1,10 @@
 import { AMINO_ACIDS, anticodon, translate } from '../lib/codon';
 import { SHORT_ORF } from '../lib/samples';
 import { complement, dnaToRna } from '../lib/sequence';
+import { DIAGRAMS } from '../lib/diagrams';
+import { mountCinema } from './cinema';
 import { bases, el } from './dom';
+import { mountFigures } from './figure';
 
 type Scene = 'helix' | 'transcription' | 'translation';
 
@@ -18,6 +21,7 @@ export function mountAnimation(root: HTMLElement): () => void {
     ),
   );
   root.append(el('p', 'motion-note', 'Reduced motion is on, so Play stays off. Use Step to move one base or one codon.'));
+  root.append(mountFigures(DIAGRAMS.animation), mountCinema('replication'), mountCinema('ribosome'));
 
   const nav = el('div', 'segment');
   const stage = el('div', 'panel stage-panel');

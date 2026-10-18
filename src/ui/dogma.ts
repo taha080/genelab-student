@@ -1,7 +1,10 @@
 import { analyzeFrame, randomOrf, type CodonView, type FrameAnalysis, type FrameId } from '../lib/codon';
 import { CLASSROOM_GENE, SHORT_ORF } from '../lib/samples';
 import { baseCounts, cleanDna, dnaToRna, gcContent, reverseComplement } from '../lib/sequence';
+import { DIAGRAMS } from '../lib/diagrams';
+import { mountCinema } from './cinema';
 import { bases, cleanMessage, copyButton, el, formatPercent, sequenceField, stat } from './dom';
+import { mountFigures } from './figure';
 
 const FRAMES: FrameId[] = [1, 2, 3, -1, -2, -3];
 const MAX = 3000;
@@ -143,7 +146,7 @@ export function mountDogma(root: HTMLElement): () => void {
     ),
   );
 
-  root.append(explain, controls, results, details);
+  root.append(explain, mountFigures(DIAGRAMS.dogma), mountCinema('replication'), controls, results, details);
 
   let codonIndex = 0;
   let timer = 0;

@@ -1,5 +1,7 @@
 import { CODON_BASES, codonHit, searchCodons, type CodonHit } from '../lib/codontable';
+import { DIAGRAMS } from '../lib/diagrams';
 import { bases, el } from './dom';
+import { mountFigures } from './figure';
 
 export function mountCodonTable(root: HTMLElement): () => void {
   root.append(
@@ -8,6 +10,7 @@ export function mountCodonTable(root: HTMLElement): () => void {
       'explain',
       'This is the standard genetic code, NCBI table 1. Rows are the first base and columns are the second. The four buttons in a box are the third base. Search by codon (ATG or AUG) or by amino acid (Phe, F, or phenylalanine). Click a codon to light up every codon for that amino acid.',
     ),
+    mountFigures(DIAGRAMS.codon),
   );
 
   const search = el('input');
