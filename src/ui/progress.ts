@@ -1,4 +1,4 @@
-import { badges, bestQuiz, LESSONS, loadProgress, resetProgress, TRACKED_TOOLS, toolsUsed } from '../lib/progress';
+import { badges, bestGame, bestQuiz, GAME_IDS, LESSONS, loadProgress, resetProgress, TRACKED_TOOLS, toolsUsed } from '../lib/progress';
 import { el } from './dom';
 
 const HASH: Record<(typeof TRACKED_TOOLS)[number], string> = {
@@ -11,6 +11,17 @@ const HASH: Record<(typeof TRACKED_TOOLS)[number], string> = {
   sequences: 'sequences',
   biochem: 'biochem',
   quiz: 'quiz',
+  games: 'games',
+  party: 'party',
+};
+
+const GAME_LABELS: Record<(typeof GAME_IDS)[number], string> = {
+  'codon-rush': 'Codon rush',
+  'base-pair': 'Base pairs',
+  krebs: 'Krebs order',
+  enzyme: 'Enzymes',
+  mutation: 'Mutations',
+  party: 'Study room',
 };
 
 export function mountProgress(root: HTMLElement): () => void {
@@ -18,7 +29,7 @@ export function mountProgress(root: HTMLElement): () => void {
     el(
       'p',
       'explain',
-      'This dashboard stays in this browser. It remembers which tools you have opened, your quiz scores, and a few completion badges. Nothing is sent to a server.',
+      'This dashboard stays in this browser. It remembers which tools you have opened, your quiz scores, game high scores, and completion badges. Nothing is sent to a server.',
     ),
   );
   const panel = el('div', 'panel');
@@ -60,6 +71,12 @@ export function mountProgress(root: HTMLElement): () => void {
       badgeRow.append(item);
     }
 
+    const gameRow = el('div', 'stats');
+    for (const game of GAME_IDS) {
+      const best = bestGame(state, game);
+      gameRow.append(pill(GAME_LABELS[game], best === null ? '—' : String(best)));
+    }
+
     const attempts = el('ol', 'review');
     const recent = state.quizzes.slice(-5).reverse();
     if (recent.length === 0) {
@@ -91,6 +108,8 @@ export function mountProgress(root: HTMLElement): () => void {
       lessons,
       el('h3', undefined, 'Badges'),
       badgeRow,
+      el('h3', undefined, 'Game high scores'),
+      gameRow,
       el('h3', undefined, 'Recent quiz scores'),
       attempts,
       reset,
