@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="GeneLab is a classroom bench for the central dogma, CRISPR guides, PCR primers, mutations, sequence tools, metabolism, and a short biotech quiz."
+    />
+    <meta name="theme-color" content="#e7e1d6" />
+    <title>GeneLab — student biotech bench</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <style>
+      html { background: #e7e1d6; }
+      html[data-theme='dark'] { background: #101614; }
+    </style>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('genelab-theme');
+          var theme = saved === 'light' || saved === 'dark'
+            ? saved
+            : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#workspace">Skip to the tools</a>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
