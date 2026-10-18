@@ -785,9 +785,88 @@ details.calc p { max-width: 70rem; }
   .path-layout { display: grid; grid-template-columns: minmax(16rem, 0.9fr) 1.1fr; gap: 12px; align-items: start; }
 }
 
+.phase-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.phase-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  font-family: var(--serif);
+  font-size: 0.95rem;
+}
+
+.phase-mark.payoff { box-shadow: inset 0 -3px 0 var(--accent); }
+.phase-mark.on { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+
+.pathway-map {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 800px) {
+  .pathway-map {
+    grid-template-columns: 1fr 1.2fr 1fr;
+    grid-template-areas:
+      "store spine currency"
+      "side spine cycle"
+      "rebuild chain chain";
+  }
+  .place-store { grid-area: store; }
+  .place-spine { grid-area: spine; }
+  .place-currency { grid-area: currency; }
+  .place-side { grid-area: side; }
+  .place-cycle { grid-area: cycle; }
+  .place-chain { grid-area: chain; }
+  .place-rebuild { grid-area: rebuild; }
+}
+
+.map-node {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 12px;
+  min-height: 4.5rem;
+}
+
+.map-node strong { font-size: 1rem; }
+.map-node span { color: var(--muted); font-size: 0.88rem; }
+.map-node.place-chain,
+.map-node.place-cycle { border-color: var(--accent); }
+
+.quiz-block {
+  border: 0;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.quiz-block legend { font-weight: 600; margin-bottom: 8px; padding: 0; }
+
+.membrane { width: 100%; height: auto; display: block; margin-bottom: 12px; }
+.membrane-band { fill: var(--accent-soft); }
+.complex { fill: var(--surface); stroke: var(--line); }
+.complex.on { fill: var(--accent); stroke: transparent; }
+.membrane-label { fill: var(--muted); font-size: 14px; font-family: var(--sans); }
+.membrane-label.on { fill: var(--on-accent); font-weight: 700; }
+.proton { fill: var(--accent-strong); }
+
 @media (max-width: 640px) {
   .cycle-node { width: 4.4rem; }
   .cycle-node span { font-size: 0.6rem; }
+  .map-node { min-height: 3.6rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

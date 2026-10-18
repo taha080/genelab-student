@@ -34,7 +34,7 @@ export function mountBiochem(root: HTMLElement): () => void {
   const body = el('div');
   root.append(nav, body);
 
-  let section: Section = 'basics';
+  let section: Section = initialBiochemSection();
   let group: SideChainGroup | 'all' = 'all';
   let vmax = 100;
   let km = 10;
@@ -432,6 +432,13 @@ export function mountBiochem(root: HTMLElement): () => void {
 
   render();
   return () => stopKrebs();
+}
+
+function initialBiochemSection(): 'basics' | 'krebs' | 'glucose' {
+  const hash = location.hash.replace(/^#/, '');
+  if (hash === 'biochem/krebs') return 'krebs';
+  if (hash === 'biochem/glucose') return 'glucose';
+  return 'basics';
 }
 
 function aminoCard(acid: AminoAcid): HTMLElement {
