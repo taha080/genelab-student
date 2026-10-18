@@ -33,6 +33,51 @@ export function sanitizeName(raw: string): string {
   return cleaned || 'Student';
 }
 
+export const NICK_KEY = 'genelab-nickname';
+
+export const FUN_NAMES = [
+  'Sunny Cell',
+  'Brave Base',
+  'Quick Codon',
+  'Gentle Gene',
+  'Bright Bond',
+  'Calm Cycle',
+  'Tiny Helix',
+  'Happy Host',
+  'Kind Kinase',
+  'Merry Molecule',
+] as const;
+
+export function pickFunName(rng: () => number = Math.random): string {
+  const index = Math.min(FUN_NAMES.length - 1, Math.max(0, Math.floor(rng() * FUN_NAMES.length)));
+  return FUN_NAMES[index] ?? 'Sunny Cell';
+}
+
+/** A saved nickname wins. A first visit gets a fun default the student can change. */
+export function loadNickname(saved: string | null, rng: () => number = Math.random): string {
+  if (saved && saved.trim()) return sanitizeName(saved);
+  return pickFunName(rng);
+}
+
+export const JOIN_RETRIES = 3;
+
+export function shouldRetryJoin(failures: number, max = JOIN_RETRIES): boolean {
+  return Number.isInteger(failures) && failures >= 0 && failures < max;
+}
+
+export function joinError(kind: string): string {
+  if (kind === 'peer-unavailable') {
+    return "We can't reach that host. Check the code, or tap Retry — they may still be opening the room.";
+  }
+  return 'The connection dropped. Tap Retry to join again.';
+}
+
+export function inviteUrl(href: string, code: string): string {
+  const url = new URL(href);
+  url.hash = `party/${code}`;
+  return url.toString();
+}
+
 /** A correct answer is worth 60, plus up to 40 for a fast reply. A miss scores 0. */
 export function racePoints(correct: boolean, elapsedMs: number): number {
   if (!correct || !Number.isFinite(elapsedMs) || elapsedMs < 0) return 0;
