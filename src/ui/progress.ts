@@ -1,4 +1,5 @@
-import { badges, bestGame, bestQuiz, GAME_IDS, LESSONS, loadProgress, resetProgress, TRACKED_TOOLS, toolsUsed } from '../lib/progress';
+import { badges, bestGame, bestLessonCheck, bestQuiz, GAME_IDS, LESSONS, loadProgress, resetProgress, TRACKED_TOOLS, toolsUsed } from '../lib/progress';
+import { METABOLISM_LESSON_IDS } from '../lib/metabolism';
 import { el } from './dom';
 
 const HASH: Record<(typeof TRACKED_TOOLS)[number], string> = {
@@ -10,6 +11,7 @@ const HASH: Record<(typeof TRACKED_TOOLS)[number], string> = {
   animation: 'animation',
   sequences: 'sequences',
   biochem: 'biochem',
+  metabolism: 'metabolism',
   quiz: 'quiz',
   games: 'games',
   party: 'party',
@@ -71,6 +73,19 @@ export function mountProgress(root: HTMLElement): () => void {
       badgeRow.append(item);
     }
 
+    const lessonLabels: Record<(typeof METABOLISM_LESSON_IDS)[number], string> = {
+      intro: 'Map',
+      atp: 'ATP',
+      glycolysis: 'Glycolysis',
+      glycogenolysis: 'Glycogen',
+      pentose: 'Pentose',
+      oxphos: 'Oxphos',
+    };
+    const lessonRow = el('div', 'stats');
+    for (const id of METABOLISM_LESSON_IDS) {
+      const bestCheck = bestLessonCheck(state, id);
+      lessonRow.append(pill(lessonLabels[id], bestCheck ? `${bestCheck.score}/${bestCheck.total}` : '—'));
+    }
     const gameRow = el('div', 'stats');
     for (const game of GAME_IDS) {
       const best = bestGame(state, game);
@@ -108,6 +123,8 @@ export function mountProgress(root: HTMLElement): () => void {
       lessons,
       el('h3', undefined, 'Badges'),
       badgeRow,
+      el('h3', undefined, 'Metabolism checks'),
+      lessonRow,
       el('h3', undefined, 'Game high scores'),
       gameRow,
       el('h3', undefined, 'Recent quiz scores'),

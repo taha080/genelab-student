@@ -1,4 +1,5 @@
 /** Browser-only progress. Nothing leaves the machine. */
+import { isMetabolismLesson, METABOLISM_LESSON_IDS, type MetabolismLessonId } from './metabolism';
 
 export const TRACKED_TOOLS = [
   'dogma',
@@ -9,6 +10,7 @@ export const TRACKED_TOOLS = [
   'animation',
   'sequences',
   'biochem',
+  'metabolism',
   'quiz',
   'games',
   'party',
@@ -32,12 +34,21 @@ export interface QuizAttempt {
   at: string;
 }
 
+export interface LessonCheck {
+  id: MetabolismLessonId;
+  score: number;
+  total: number;
+  at: string;
+}
+
 export interface ProgressState {
   version: 1;
   /** ISO time of the first visit, keyed by tool. */
   used: Partial<Record<TrackedTool, string>>;
   quizzes: QuizAttempt[];
   games: GameAttempt[];
+  /** Quick checks from the metabolism lessons. Missing on saves from before those lessons. */
+  checks: LessonCheck[];
 }
 
 export interface Badge {
@@ -62,6 +73,7 @@ export const LESSONS: readonly Lesson[] = [
   { tool: 'animation', title: 'Animation', detail: 'Step through the helix, transcription, or translation.' },
   { tool: 'sequences', title: 'Sequence tools', detail: 'Reverse-complement, cut, find an ORF, or align two sequences.' },
   { tool: 'biochem', title: 'Biochemistry', detail: 'Amino acids, enzyme kinetics, the citric acid cycle, and gluconeogenesis.' },
+  { tool: 'metabolism', title: 'Metabolism lessons', detail: 'ATP, glycolysis, glycogen, the pentose phosphate pathway, and oxidative phosphorylation.' },
   { tool: 'quiz', title: 'Quiz', detail: 'Finish a quiz round.' },
   { tool: 'games', title: 'Games', detail: 'Play a round and keep a high score.' },
   { tool: 'party', title: 'Study room', detail: 'Join a room, pass a device, or open a challenge link.' },
@@ -76,7 +88,7 @@ export interface KeyValueStore {
 }
 
 export function emptyProgress(): ProgressState {
-  return { version: 1, used: {}, quizzes: [], games: [] };
+  return { version: 1, used: {}, quizzes: [], games: [], checks: [] };
 }
 
 function isGameId(value: unknown): value is GameId {
@@ -122,7 +134,20 @@ export function loadProgress(store: KeyValueStore): ProgressState {
         games.push({ game, score, at });
       }
     }
-    return { version: 1, used, quizzes, games };
+    const checks: LessonCheck[] = [];
+    if (Array.isArray(record.checks)) {
+      for (const item of record.checks) {
+        if (!item || typeof item !== 'object') continue;
+        const id = (item as LessonCheck).id;
+        const score = Number((item as LessonCheck).score);
+        const total = Number((item as LessonCheck).total);
+        const at = (item as LessonCheck).at;
+        if (!isMetabolismLesson(id) || !Number.isInteger(score) || !Number.isInteger(total) || total < 1) continue;
+        if (score < 0 || score > total || typeof at !== 'string') continue;
+        checks.push({ id, score, total, at });
+      }
+    }
+    return { version: 1, used, quizzes, games, checks };
   } catch {
     return emptyProgress();
   }
@@ -191,7 +216,8 @@ export function badges(state: ProgressState): Badge[] {
     { id: 'codon', title: 'Code reader', detail: 'Open the codon table.', earned: used('codon') },
     { id: 'animation', title: 'In motion', detail: 'Open the helix and polymerase.', earned: used('animation') },
     { id: 'sequences', title: 'Sequence bench', detail: 'Open the sequence tools.', earned: used('sequences') },
-    { id: 'biochem', title: 'Metabolism', detail: 'Open the biochemistry bench.', earned: used('biochem') },
+    { id: 'biochem', title: 'Biochemistry', detail: 'Open the biochemistry bench.', earned: used('biochem') },
+    { id: 'metabolism', title: 'Pathways', detail: 'Open the metabolism lessons.', earned: used('metabolism') },
     { id: 'quiz', title: 'Quiz taken', detail: 'Finish one quiz.', earned: state.quizzes.length > 0 },
     { id: 'games', title: 'Player', detail: 'Finish any game.', earned: state.games.some((attempt) => attempt.game !== 'party') },
     { id: 'codon-rush', title: 'Codon rush', detail: 'Translate codons against the clock.', earned: state.games.some((attempt) => attempt.game === 'codon-rush') },
@@ -200,6 +226,12 @@ export function badges(state: ProgressState): Badge[] {
     { id: 'enzyme', title: 'Enzyme match', detail: 'Pair enzymes with their reactions.', earned: state.games.some((attempt) => attempt.game === 'enzyme') },
     { id: 'mutation', title: 'Detective', detail: 'Name a mutation from the sequence change.', earned: state.games.some((attempt) => attempt.game === 'mutation') },
     { id: 'party', title: 'Study group', detail: 'Finish a room, a pass-and-play round, or a challenge.', earned: state.games.some((attempt) => attempt.game === 'party') },
+    {
+      id: 'pathways',
+      title: 'Six pathways',
+      detail: 'Finish the quiz in every metabolism lesson.',
+      earned: METABOLISM_LESSON_IDS.every((id) => state.checks.some((check) => check.id === id)),
+    },
     {
       id: 'high-score',
       title: 'High score',
@@ -217,6 +249,21 @@ export function badges(state: ProgressState): Badge[] {
   return list;
 }
 
+export function bestLessonCheck(state: ProgressState, id: MetabolismLessonId): LessonCheck | null {
+  let best: LessonCheck | null = null;
+  for (const check of state.checks) {
+    if (check.id !== id) continue;
+    if (!best || check.score > best.score) best = check;
+  }
+  return best;
+}
+
+export function recordLessonCheck(state: ProgressState, id: string, score: number, total: number, at: string): ProgressState {
+  if (!isMetabolismLesson(id)) return state;
+  if (!Number.isInteger(score) || !Number.isInteger(total) || total < 1 || score < 0 || score > total) return state;
+  return { ...state, checks: [...state.checks, { id, score, total, at }] };
+}
+
 export function touchTool(store: KeyValueStore, tool: TrackedTool, at = new Date().toISOString()): ProgressState {
   const next = markToolUsed(loadProgress(store), tool, at);
   saveProgress(store, next);
@@ -232,6 +279,18 @@ export function saveQuizScore(store: KeyValueStore, score: number, total: number
 export function saveGameScore(store: KeyValueStore, game: GameId, score: number, at = new Date().toISOString()): ProgressState {
   const tool: TrackedTool = game === 'party' ? 'party' : 'games';
   const next = recordGame(markToolUsed(loadProgress(store), tool, at), game, score, at);
+  saveProgress(store, next);
+  return next;
+}
+
+export function saveLessonCheck(
+  store: KeyValueStore,
+  id: string,
+  score: number,
+  total: number,
+  at = new Date().toISOString(),
+): ProgressState {
+  const next = recordLessonCheck(markToolUsed(loadProgress(store), 'metabolism', at), id, score, total, at);
   saveProgress(store, next);
   return next;
 }
