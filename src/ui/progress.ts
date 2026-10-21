@@ -1,5 +1,6 @@
 import { badges, bestGame, bestLessonCheck, bestQuiz, GAME_IDS, LESSONS, loadProgress, resetProgress, TRACKED_TOOLS, toolsUsed } from '../lib/progress';
 import { METABOLISM_LESSON_IDS } from '../lib/metabolism';
+import { STUDY_TOPICS } from '../lib/study';
 import { el } from './dom';
 
 const HASH: Record<(typeof TRACKED_TOOLS)[number], string> = {
@@ -12,6 +13,7 @@ const HASH: Record<(typeof TRACKED_TOOLS)[number], string> = {
   sequences: 'sequences',
   biochem: 'biochem',
   metabolism: 'metabolism',
+  study: 'study',
   quiz: 'quiz',
   games: 'games',
   party: 'party',
@@ -117,6 +119,12 @@ export function mountProgress(root: HTMLElement): () => void {
       render();
     });
 
+    const studyRow = el('div', 'stats');
+    for (const topic of STUDY_TOPICS) {
+      const bestCheck = bestLessonCheck(state, topic.id);
+      studyRow.append(pill(topic.short, bestCheck ? `${bestCheck.score}/${bestCheck.total}` : '—'));
+    }
+
     panel.append(
       stats,
       el('h3', undefined, 'Lessons'),
@@ -125,6 +133,8 @@ export function mountProgress(root: HTMLElement): () => void {
       badgeRow,
       el('h3', undefined, 'Metabolism checks'),
       lessonRow,
+      el('h3', undefined, 'Study topic checks'),
+      studyRow,
       el('h3', undefined, 'Game high scores'),
       gameRow,
       el('h3', undefined, 'Recent quiz scores'),

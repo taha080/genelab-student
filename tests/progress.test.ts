@@ -60,7 +60,7 @@ describe('progress tracker', () => {
 
   it('earns the bench badge only after every tool and a finished quiz', () => {
     let state = emptyProgress();
-    for (const tool of ['dogma', 'crispr', 'primers', 'mutations', 'codon', 'animation', 'sequences', 'biochem', 'metabolism', 'quiz', 'games', 'party'] as const) {
+    for (const tool of ['dogma', 'crispr', 'primers', 'mutations', 'codon', 'animation', 'sequences', 'biochem', 'metabolism', 'study', 'quiz', 'games', 'party'] as const) {
       state = markToolUsed(state, tool, '2026-01-01T00:00:00.000Z');
     }
     expect(badges(state).find((badge) => badge.id === 'complete')?.earned).toBe(false);
