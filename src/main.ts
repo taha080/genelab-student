@@ -8,6 +8,7 @@ import { TRACKED_TOOLS, touchTool, type TrackedTool } from './lib/progress';
 import { mountAnimation } from './ui/animate';
 import { mountBiochem } from './ui/biochem';
 import { mountMetabolism } from './ui/metabolism';
+import { mountStudy } from './ui/study';
 import { mountCodonTable } from './ui/codontable';
 import { mountCrispr } from './ui/crispr';
 import { mountDogma } from './ui/dogma';
@@ -31,6 +32,7 @@ const TOOLS = [
   { id: 'sequences', hash: 'sequences', label: 'Sequences', mount: mountSequences },
   { id: 'biochem', hash: 'biochem', label: 'Biochemistry', mount: mountBiochem },
   { id: 'metabolism', hash: 'metabolism', label: 'Metabolism', mount: mountMetabolism },
+  { id: 'study', hash: 'study', label: 'Study', mount: mountStudy },
   { id: 'games', hash: 'games', label: 'Games', mount: mountGames },
   { id: 'party', hash: 'party', label: 'Study room', mount: mountParty },
   { id: 'quiz', hash: 'quiz', label: 'Quiz', mount: mountQuiz },
@@ -140,6 +142,7 @@ function toolFromHash(): ToolId {
   if (hash === 'party' || hash.startsWith('party/') || hash.startsWith('challenge/')) return 'party';
   if (hash === 'biochem' || hash.startsWith('biochem/')) return 'biochem';
   if (hash === 'metabolism' || hash.startsWith('metabolism/')) return 'metabolism';
+  if (hash === 'study' || hash.startsWith('study/')) return 'study';
   return TOOLS.find((tool) => tool.hash === hash)?.id ?? 'dogma';
 }
 
