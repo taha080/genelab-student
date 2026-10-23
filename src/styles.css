@@ -201,7 +201,7 @@ h1 span { font-style: italic; color: var(--accent); }
   color: var(--muted);
 }
 
-textarea.seq, input.seq, input[type='text'], input[type='number'], input[type='search'], select {
+textarea.seq, textarea.assign-text, input.seq, input[type='text'], input[type='password'], input[type='number'], input[type='search'], select {
   width: 100%;
   border: 1px solid var(--line);
   background: var(--surface-2);
@@ -1349,6 +1349,156 @@ gene-cinema.cinema {
 
 @media (prefers-reduced-motion: reduce) {
   .cinema-svg { animation: none; }
+}
+
+.assign-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.assign-span { margin-top: 4px; }
+.assign-span .caption { margin: 0; }
+.field .segment { margin-bottom: 0; }
+
+textarea.assign-text { min-height: 7rem; resize: vertical; line-height: 1.5; }
+
+.assign-key .field { margin-bottom: 8px; }
+
+.assign-note a {
+  color: var(--accent-strong);
+  font-weight: 650;
+}
+
+.assign-setup button:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.assign-paper {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 22px 8px;
+  margin-bottom: 14px;
+  max-width: 46rem;
+}
+
+.assign-body h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 3vw, 2.25rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 4px 0 14px;
+}
+
+.assign-body h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.35rem;
+  margin: 18px 0 8px;
+}
+
+.assign-body p { margin: 0 0 12px; }
+
+.assign-body ul,
+.assign-body ol {
+  margin: 0 0 14px;
+  padding-left: 1.3rem;
+}
+
+.assign-body li { margin: 0 0 6px; }
+
+.assign-body pre {
+  margin: 0 0 14px;
+  padding: 12px;
+  overflow-x: auto;
+  background: var(--surface-2);
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.assign-body code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.assign-body p code,
+.assign-body li code {
+  background: var(--surface-2);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.assign-body a {
+  color: var(--accent-strong);
+  font-weight: 650;
+}
+
+.assign-body hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 16px 0;
+}
+
+@media (max-width: 640px) {
+  .assign-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+  html[data-printing='assignment'] {
+    background: #fff;
+  }
+
+  html[data-printing='assignment'] body {
+    background: #fff;
+  }
+
+  html[data-printing='assignment'] .top,
+  html[data-printing='assignment'] .tabs,
+  html[data-printing='assignment'] .site-footer,
+  html[data-printing='assignment'] .skip,
+  html[data-printing='assignment'] .explain,
+  html[data-printing='assignment'] .assign-setup,
+  html[data-printing='assignment'] .assign-actions,
+  html[data-printing='assignment'] .assign-screen {
+    display: none !important;
+  }
+
+  html[data-printing='assignment'] .shell {
+    max-width: none;
+    padding: 0;
+  }
+
+  html[data-printing='assignment'] .assign-paper {
+    max-width: none;
+    border: 0;
+    box-shadow: none;
+    background: #fff;
+    color: #1c2822;
+    padding: 0;
+    margin: 0;
+  }
+
+  html[data-printing='assignment'] .assign-body,
+  html[data-printing='assignment'] .assign-body h2,
+  html[data-printing='assignment'] .assign-body h3,
+  html[data-printing='assignment'] .assign-body p,
+  html[data-printing='assignment'] .assign-body li {
+    color: #1c2822;
+  }
+
+  html[data-printing='assignment'] .assign-body a {
+    color: #084838;
+  }
+
+  html[data-printing='assignment'] .assign-body pre,
+  html[data-printing='assignment'] .assign-body code {
+    background: #f3eee6;
+    color: #1c2822;
+  }
 }
 
 .def-list { display: grid; gap: 10px; margin: 0; }

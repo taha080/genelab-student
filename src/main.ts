@@ -8,6 +8,7 @@ import { TRACKED_TOOLS, touchTool, type TrackedTool } from './lib/progress';
 import { mountAnimation } from './ui/animate';
 import { mountBiochem } from './ui/biochem';
 import { mountMetabolism } from './ui/metabolism';
+import { mountAssignment } from './ui/assignment';
 import { mountStudy } from './ui/study';
 import { mountCodonTable } from './ui/codontable';
 import { mountCrispr } from './ui/crispr';
@@ -33,6 +34,7 @@ const TOOLS = [
   { id: 'biochem', hash: 'biochem', label: 'Biochemistry', mount: mountBiochem },
   { id: 'metabolism', hash: 'metabolism', label: 'Metabolism', mount: mountMetabolism },
   { id: 'study', hash: 'study', label: 'Study', mount: mountStudy },
+  { id: 'assignment', hash: 'assignment', label: 'AI Assignment Maker', mount: mountAssignment },
   { id: 'games', hash: 'games', label: 'Games', mount: mountGames },
   { id: 'party', hash: 'party', label: 'Study room', mount: mountParty },
   { id: 'quiz', hash: 'quiz', label: 'Quiz', mount: mountQuiz },
@@ -93,7 +95,7 @@ footer.append(
   links,
   contact,
   about,
-  el('p', 'fine', 'A static portfolio project. Sequences and scores stay in this browser. Estimates are for teaching, not for a clinical design.'),
+  el('p', 'fine', 'A static portfolio project. Sequences, scores, and a Groq key you paste stay in this browser. Estimates are for teaching, not for a clinical design.'),
 );
 
 shell.append(top, tabs, workspace, footer);
