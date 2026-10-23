@@ -1365,6 +1365,11 @@ textarea.assign-text { min-height: 7rem; resize: vertical; line-height: 1.5; }
 
 .assign-key .field { margin-bottom: 8px; }
 
+input.assign-secret {
+  -webkit-text-security: disc;
+  font-family: var(--mono);
+}
+
 .assign-note a {
   color: var(--accent-strong);
   font-weight: 650;

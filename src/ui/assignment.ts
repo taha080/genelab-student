@@ -263,12 +263,15 @@ function keyPanel(): { block: HTMLElement; input: HTMLInputElement; saved: HTMLE
   const block = el('div', 'assign-key');
   const input = el('input');
   input.id = 'assign-key';
-  input.type = 'password';
+  input.type = 'text';
+  input.className = 'assign-secret';
   input.autocomplete = 'off';
   input.spellcheck = false;
   input.placeholder = 'gsk_…';
   input.setAttribute('autocapitalize', 'off');
   input.setAttribute('autocorrect', 'off');
+  input.setAttribute('data-1p-ignore', 'true');
+  input.setAttribute('data-lpignore', 'true');
   let stored = '';
   try {
     stored = readGroqKey(localStorage);
@@ -281,11 +284,12 @@ function keyPanel(): { block: HTMLElement; input: HTMLInputElement; saved: HTMLE
   label.append(el('span', 'field-label', 'Your free Groq API key'), input);
   const toggle = el('button', 'ghost tiny', 'Show key');
   toggle.type = 'button';
+  toggle.setAttribute('aria-pressed', 'false');
   toggle.addEventListener('click', () => {
-    const hidden = input.type === 'password';
-    input.type = hidden ? 'text' : 'password';
-    toggle.textContent = hidden ? 'Hide key' : 'Show key';
-    toggle.setAttribute('aria-pressed', String(hidden));
+    const hidden = !input.classList.contains('assign-secret');
+    input.classList.toggle('assign-secret', hidden);
+    toggle.textContent = hidden ? 'Show key' : 'Hide key';
+    toggle.setAttribute('aria-pressed', String(!hidden));
   });
   const forget = el('button', 'ghost tiny', 'Forget key');
   forget.type = 'button';
