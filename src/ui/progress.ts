@@ -14,6 +14,7 @@ const HASH: Record<(typeof TRACKED_TOOLS)[number], string> = {
   biochem: 'biochem',
   metabolism: 'metabolism',
   study: 'study',
+  assignment: 'assignment',
   quiz: 'quiz',
   games: 'games',
   party: 'party',

@@ -2,7 +2,7 @@
 
 **DNA, enzymes, and metabolism — worked through on one bench.**
 
-A static classroom bench for FSc (higher secondary) and early university biotechnology. DNA, scores, and study rooms stay in the browser. The page has no server, no account, and no API key.
+A static classroom bench for FSc (higher secondary) and early university biotechnology. DNA, scores, and study rooms stay in the browser. The page has no server and no account. The AI Assignment Maker calls Groq from this browser with a free key the visitor pastes. That key is stored only in `localStorage` and is not part of this repository.
 
 **Live site:** [https://taha080.github.io/genelab-student/](https://taha080.github.io/genelab-student/)
 
@@ -16,7 +16,7 @@ GitHub Actions publishes the site from `main`. A push to that branch builds the 
 
 ## What it is
 
-GeneLab is a single-page study bench. A student pastes DNA or opens a lesson, and the browser does the calculation on that computer. Beside the sequence tools are biochemistry and metabolism lessons, eighteen syllabus notes, a thirty-question quiz, five short games, and a peer-to-peer study room.
+GeneLab is a single-page study bench. A student pastes DNA or opens a lesson, and the browser does the calculation on that computer. Beside the sequence tools are biochemistry and metabolism lessons, eighteen syllabus notes, a free AI assignment maker, a thirty-question quiz, five short games, and a peer-to-peer study room.
 
 The header calls the app a student bench. The footer states the same limit the science uses: estimates are for teaching, not for a clinical design.
 
@@ -45,6 +45,7 @@ Tabs along the top switch tools. The address hash opens a tool directly. With no
 
   The map also opens the citric acid cycle and gluconeogenesis, which live on the Biochemistry tab. Glycolysis, glycogen breakdown, the citric acid cycle, electron transport, and ATP synthase have play, pause, speed (0.5×, 1×, and 2×), and step. Reduced motion keeps those scenes on Step.
 - **Study.** Eighteen syllabus notes for chapters the tools do not already teach. Described in the next section.
+- **AI Assignment Maker.** Writes a complete English assignment from a type, a topic, the sections it must contain, a word length, and a level. Types include an essay, a lab report, a research summary, a case study, Q&A, and a presentation outline, or a type the student types. The draft has a title, an introduction, headed sections, a conclusion, and reference suggestions. Copy, Download .txt, Download .md, and Print to PDF sit above the formatted draft. The call goes from the browser to Groq’s free API with the visitor’s own key (`openai/gpt-oss-20b`, then `openai/gpt-oss-120b` if the first model does not answer). Get a key at [console.groq.com](https://console.groq.com/keys). The key is saved only under `genelab-groq-key` in this browser. Open `#assignment`.
 - **Games.** Five games that use the same science as the bench. High scores stay with the other progress, and badges unlock from finished rounds.
   - Codon rush: 45 seconds on the standard code. A correct codon is 10 points, a streak adds a small bonus, and a miss costs 2.
   - Base pairs: DNA A–T, DNA G–C, RNA A–U, and RNA G–C. A DNA adenine is not treated as a match for uracil.
@@ -100,9 +101,10 @@ GeneLab is a static site. [Vite](https://vite.dev/) bundles TypeScript into the 
 - The science and the scoring live in `src/lib/`. The screens in `src/ui/` render those results into the page. There is no UI framework.
 - The URL hash selects the tab. Longer hashes open a biochemistry section, a metabolism lesson (`#metabolism/glycolysis`), a study topic, a room invite (`#party/` plus the code), or a challenge (`#challenge/` plus an encoded seed and score).
 - Sequence cleaning keeps A, C, G, T, and U. U is stored as T. FASTA title lines, whitespace, and digits are dropped. Any other character is skipped and counted. Nothing you paste is uploaded.
-- Progress is JSON under the key `genelab-progress`. The theme is `genelab-theme` (`light` or `dark`; otherwise the page follows the system preference). A study-room name is `genelab-nickname`. If the browser blocks storage, the tool still opens.
+- Progress is JSON under the key `genelab-progress`. The theme is `genelab-theme` (`light` or `dark`; otherwise the page follows the system preference). A study-room name is `genelab-nickname`. A Groq key the visitor pastes for the assignment maker is `genelab-groq-key`. If the browser blocks storage, the tool still opens, and the key lasts only until the page is closed.
 - Diagrams and animations are inline SVG. The animated scenes are a custom element, `gene-cinema`, with play, pause, 0.5×, 1×, 2×, and step. When `prefers-reduced-motion: reduce` matches, Play is disabled and Step still works.
 - The live study room uses [PeerJS](https://github.com/peers/peerjs). `new Peer()` uses the public PeerJS broker, which only introduces the browsers. The room itself is WebRTC between those browsers, and this site stores no room. There is no API key in the repository. QR codes are drawn in the page with the `uqr` package.
+- The AI Assignment Maker is the one tool that calls another service. The browser `POST`s to `https://api.groq.com/openai/v1/chat/completions` with the key from `genelab-groq-key`. Nothing else the student types is stored on a GeneLab server, because there is no server. If the first model fails for a reason other than a rejected key, the page tries `openai/gpt-oss-120b` once. A rejected key is not retried.
 - Figtree, Newsreader, and IBM Plex Mono are bundled with `@fontsource`, so the built site does not request those fonts from another host.
 - `vite.config.ts` sets `base` to `./`, so the built files load under the GitHub Pages path `/genelab-student/`.
 
@@ -136,11 +138,12 @@ npm run dev
 ## Usage
 
 1. Open the [live site](https://taha080.github.io/genelab-student/) or the local development server.
-2. Choose a tab, or set the hash. Examples: `#primers`, `#metabolism/glycolysis`, `#study/pcr`, `#quiz`.
+2. Choose a tab, or set the hash. Examples: `#primers`, `#metabolism/glycolysis`, `#study/pcr`, `#assignment`, `#quiz`.
 3. On a sequence tool, paste DNA or FASTA, or press a sample button. The result updates as you type.
 4. Use **Dark mode** or **Light mode** in the header. The choice is remembered in this browser.
 5. Open **Progress** for tools you have opened, badges, recent quiz scores, lesson checks, and game high scores. **Reset progress**, then **Confirm reset**, clears that store on this browser.
 6. For a group, open **Study room**. Create a live room and share the code, link, or QR code. If the network is unavailable, use **Pass and play** or a **Challenge link**.
+7. For a written draft, open **AI Assignment Maker**. Paste a free Groq key from [console.groq.com](https://console.groq.com/keys) once, then choose the type, topic, required sections, word length, and level. Read the draft and personalize it before handing it in. Copy it, download `.txt` or `.md`, or use **Print to PDF** and choose Save as PDF in the print dialog.
 
 ## Project structure
 
@@ -153,7 +156,9 @@ public/favicon.svg
 src/main.ts                 shell, tabs, hash routing, light and dark theme
 src/styles.css
 src/ui/                     one mount function per tab, plus figures, cinema, and voice
+src/ui/assignment.ts        AI Assignment Maker screen
 src/lib/                    genetic code, primers, CRISPR, metabolism, study notes, games, progress
+src/lib/assignment.ts       Groq request, prompt, errors, and Markdown for the assignment maker
 src/lib/studyPart1.ts       Biomolecules through Evolution
 src/lib/studyPart2.ts       Microbiology through Cloning
 src/lib/studyPart3.ts       Bioinformatics through Health biotechnology
@@ -170,7 +175,7 @@ Runtime dependencies are `peerjs`, `uqr`, and the three `@fontsource` packages. 
 npm test
 ```
 
-That runs Vitest once (`vitest run`) in Node, matching `tests/**/*.test.ts`. The suite covers the genetic code, codon table, CRISPR guides, primer melting temperatures, mutations, sequence tools, biochemistry, metabolism, study pages, figures, motion scripts, games, the quiz, progress, study-room rules, chat, and voice rules. The tests do not open a browser.
+That runs Vitest once (`vitest run`) in Node, matching `tests/**/*.test.ts`. The suite covers the genetic code, codon table, CRISPR guides, primer melting temperatures, mutations, sequence tools, biochemistry, metabolism, study pages, figures, motion scripts, games, the quiz, progress, the assignment maker’s Groq request and fallback, study-room rules, chat, and voice rules. The tests do not open a browser and do not call Groq.
 
 GitHub Actions runs `npm ci`, `npm test`, and `npm run build` on pull requests and on pushes to `main`. A push to `main` that passes those steps uploads `dist/` and deploys it with GitHub Pages. In the repository settings, Pages needs **GitHub Actions** as the source.
 
