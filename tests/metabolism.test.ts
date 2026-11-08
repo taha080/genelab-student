@@ -17,6 +17,7 @@ import {
   UREA_CYCLE,
   canPhosphorylateAdp,
   coupledFreeEnergy,
+  glucoseOxidationYield,
   glycolysisYield,
   gradeLesson,
   lessonFromHash,
@@ -140,12 +141,31 @@ describe('metabolism lessons', () => {
     expect(OXPHOS_AGENTS.find((agent) => agent.id === 'dnp')?.kind).toBe('uncoupler');
   });
 
+  it('totals 32 ATP with the malate–aspartate shuttle and 30 with glycerol-phosphate', () => {
+    const malate = glucoseOxidationYield('malate');
+    expect(malate.glycolysis).toEqual({ atp: 2, nadh: 2 });
+    expect(malate.pdh).toEqual({ nadh: 2 });
+    expect(malate.krebs).toEqual({ nadh: 6, fadh2: 2, gtp: 2 });
+    expect(malate.etc).toEqual({ nadh: 10, fadh2: 2 });
+    expect(malate.atp).toBe(32);
+    expect(malate.energyKj).toBe(976);
+    expect(malate.efficiencyPct).toBe(34);
+    const glycerol = glucoseOxidationYield('glycerol');
+    expect(glycerol.glycolysis).toEqual({ atp: 2, nadh: 2 });
+    expect(glycerol.pdh).toEqual({ nadh: 2 });
+    expect(glycerol.krebs).toEqual({ nadh: 6, fadh2: 2, gtp: 2 });
+    expect(glycerol.etc).toEqual({ nadh: 8, fadh2: 4 });
+    expect(glycerol.atp).toBe(30);
+    expect(glycerol.energyKj).toBe(915);
+    expect(glycerol.efficiencyPct).toBe(32);
+  });
+
   it('grades a lesson quiz and keeps the check in progress', () => {
     const glycolysis = METABOLISM_LESSONS.find((lesson) => lesson.id === 'glycolysis');
     expect(glycolysis).toBeTruthy();
     const correct = glycolysis?.quiz.map((question) => question.answer) ?? [];
-    expect(gradeLesson('glycolysis', correct)).toEqual({ score: 4, total: 4 });
-    const wrong = gradeLesson('glycolysis', [0, 0, 0, 0]);
+    expect(gradeLesson('glycolysis', correct)).toEqual({ score: 5, total: 5 });
+    const wrong = gradeLesson('glycolysis', [0, 0, 0, 0, 0]);
     expect(wrong?.score).toBe(correct.filter((answer) => answer === 0).length);
     expect(gradeLesson('glycolysis', [0])).toBeNull();
     const store = memory();
