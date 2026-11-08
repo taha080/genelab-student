@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   ATP_TO_ADP_KJ,
+  BETA_OXIDATION,
+  BETA_OX_PALMITATE,
   GLYCOGEN_GLYCOLYSIS_ATP,
   GLYCOLYSIS,
   GLYCOGENOLYSIS,
@@ -12,6 +14,7 @@ import {
   PENTOSE_RECYCLE,
   PHOSPHATE_COMPOUNDS,
   PO_RATIO,
+  UREA_CYCLE,
   canPhosphorylateAdp,
   coupledFreeEnergy,
   glycolysisYield,
@@ -37,12 +40,14 @@ function memory(): KeyValueStore {
 
 describe('metabolism lessons', () => {
   it('links the map to every new lesson plus the citric acid cycle and gluconeogenesis', () => {
-    expect(METABOLISM_LESSONS.map((lesson) => lesson.id)).toEqual(['intro', 'atp', 'glycolysis', 'glycogenolysis', 'pentose', 'oxphos']);
+    expect(METABOLISM_LESSONS.map((lesson) => lesson.id)).toEqual(['intro', 'atp', 'glycolysis', 'glycogenolysis', 'pentose', 'urea', 'betaox', 'oxphos']);
     expect(METABOLISM_LESSONS.every((lesson) => lesson.quiz.length >= 4)).toBe(true);
     expect(MAP_LINKS.map((link) => link.hash)).toEqual([
       'metabolism/glycogenolysis',
       'metabolism/glycolysis',
       'metabolism/pentose',
+      'metabolism/urea',
+      'metabolism/betaox',
       'metabolism/atp',
       'biochem/krebs',
       'metabolism/oxphos',
@@ -101,6 +106,27 @@ describe('metabolism lessons', () => {
     expect(PENTOSE_PATHWAY.find((step) => step.id === 'g6pd')?.regulation).toMatch(/NADPH/);
     expect(PENTOSE_PATHWAY.find((step) => step.id === 'tk1')?.detail).toMatch(/two-carbon/);
     expect(PENTOSE_RECYCLE).toEqual({ glucose6p: 3, nadph: 6, co2: 3, fructose6p: 2, glyceraldehyde3p: 1 });
+  });
+
+  it('covers the urea cycle in two compartments and beta-oxidation in four repeating steps', () => {
+    expect(UREA_CYCLE.map((step) => step.enzyme)).toEqual([
+      'Carbamoyl phosphate synthetase I',
+      'Ornithine transcarbamoylase',
+      'Argininosuccinate synthetase',
+      'Argininosuccinate lyase',
+      'Arginase',
+    ]);
+    expect(UREA_CYCLE.filter((step) => step.phase === 'Mitochondrion').map((step) => step.id)).toEqual(['cps1', 'otc']);
+    expect(UREA_CYCLE.filter((step) => step.phase === 'Cytosol').map((step) => step.id)).toEqual(['ass', 'asl', 'arginase']);
+    expect(BETA_OXIDATION.map((step) => step.enzyme)).toEqual([
+      'Acyl-CoA dehydrogenase',
+      'Enoyl-CoA hydratase',
+      '3-Hydroxyacyl-CoA dehydrogenase',
+      'Beta-ketothiolase',
+    ]);
+    expect(BETA_OX_PALMITATE).toEqual({ cycles: 7, acetylCoA: 8, fadh2: 7, nadh: 7, atp: 106 });
+    expect(lessonFromHash('#metabolism/urea')).toBe('urea');
+    expect(lessonFromHash('#metabolism/betaox')).toBe('betaox');
   });
 
   it('pumps 10 protons from NADH and 6 from succinate', () => {

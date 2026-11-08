@@ -23,6 +23,8 @@ describe('lesson figures', () => {
       'glycolysis',
       'glycogenolysis',
       'pentose',
+      'urea',
+      'betaox',
       'oxphos',
     ]);
     for (const topic of FIGURE_TOPICS) {
@@ -187,6 +189,36 @@ describe('lesson figures', () => {
     expect(pentose).toContain('ribose 5-phosphate');
     expect(pentose).toContain('fructose 6-phosphate');
     expect(pentose).toContain('cytosol');
+    expect(pentose).toContain('gluconolactonase');
+    expect(pentose).toContain('6-phosphogluconate dehydrogenase');
+    expect(pentose).toContain('6-phosphoglucono-δ-lactone');
+    expect(pentose).toContain('isomerase');
+    expect(pentose).toContain('epimerase');
+    expect(pentose).toContain('transketolase');
+    expect(pentose).toContain('transaldolase');
+    expect(pentose).toContain('xylulose 5-phosphate');
+    expect(pentose).toContain('sedoheptulose 7-phosphate');
+    expect(pentose).toContain('erythrose 4-phosphate');
+
+    const urea = blob('urea');
+    expect(urea).toContain('Urea cycle');
+    expect(urea).toContain('carbamoyl phosphate synthetase I');
+    expect(urea).toContain('ornithine transcarbamoylase');
+    expect(urea).toContain('Argininosuccinate');
+    expect(urea).toContain('arginase');
+    expect(urea).toContain('mitochondrion');
+    expect(urea).toContain('cytosol');
+    expect(urea).toContain('4 high-energy phosphates');
+
+    const betaox = blob('betaox');
+    expect(betaox).toContain('Beta-oxidation');
+    expect(betaox).toContain('acyl-CoA dehydrogenase');
+    expect(betaox).toContain('enoyl-CoA hydratase');
+    expect(betaox).toContain('beta-ketothiolase');
+    expect(betaox).toContain('trans-Δ²-enoyl-CoA');
+    expect(betaox).toContain('CPT-I');
+    expect(betaox).toContain('malonyl-CoA');
+    expect(betaox).toContain('106 ATP');
 
     const oxphos = blob('oxphos');
     expect(oxphos).toContain('outer membrane');
