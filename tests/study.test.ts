@@ -69,6 +69,10 @@ describe('study topics', () => {
     const pcr = JSON.stringify(studyTopic('pcr'));
     expect(pcr).toContain('1024');
     expect(pcr).toContain('1,073,741,824');
+    const arthropoda = JSON.stringify(studyTopic('arthropoda'));
+    expect(arthropoda).toContain('chitin');
+    expect(arthropoda).toContain('Crustacea');
+    expect(arthropoda).toContain('ecdysis');
   });
 
   it('grades a perfect round and rejects a blank', () => {

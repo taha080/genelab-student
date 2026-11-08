@@ -239,9 +239,10 @@ describe('assignment maker', () => {
     expect(result).toEqual({ ok: false, message: emptyProblem() });
   });
 
-  it('leaves the eighteen study topics untouched', () => {
-    expect(STUDY_TOPIC_IDS).toHaveLength(18);
+  it('leaves the nineteen study topics untouched', () => {
+    expect(STUDY_TOPIC_IDS).toHaveLength(19);
     expect(STUDY_TOPIC_IDS).toContain('biomolecules');
     expect(STUDY_TOPIC_IDS).toContain('health');
+    expect(STUDY_TOPIC_IDS).toContain('arthropoda');
   });
 });
