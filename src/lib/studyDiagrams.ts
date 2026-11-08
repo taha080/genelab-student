@@ -405,6 +405,40 @@ const health = flow(
   ],
 );
 
+const arthropoda = diagram(
+  'arthropoda-body',
+  'Arthropod body plan. An insect has three regions: a head with antennae, eyes, and mouthparts; a thorax carrying three pairs of jointed legs and wings; and an abdomen with no legs. The body is covered by a chitinous exoskeleton, and growth needs moulting. The five classes are Insecta, Arachnida, Crustacea, Myriapoda, and Merostomata.',
+  'An insect body has a head, a thorax, and an abdomen. The thorax carries the legs and wings. All arthropods share jointed appendages and a chitin exoskeleton that must be moulted to grow. The five classes below cover insects, spiders, crabs, centipedes, and the horseshoe crab.',
+  640,
+  280,
+  [
+    text(320, 22, 'Insect body plan', 16),
+    rect(24, 48, 180, 90, 'surface', 'accent', 12),
+    text(114, 78, 'Head', 15),
+    text(114, 102, 'antennae, eyes', 12, 'middle', 'muted', 600),
+    text(114, 122, 'mouthparts', 12, 'middle', 'muted', 600),
+    rect(228, 48, 184, 90, 'soft', 'accent', 12),
+    text(320, 78, 'Thorax', 15),
+    text(320, 102, '3 pairs of legs', 12, 'middle', 'muted', 600),
+    text(320, 122, 'wings', 12, 'middle', 'muted', 600),
+    rect(436, 48, 180, 90, 'surface', 'accent', 12),
+    text(526, 78, 'Abdomen', 15),
+    text(526, 102, 'no legs', 12, 'middle', 'muted', 600),
+    text(526, 122, 'spiracles', 12, 'middle', 'muted', 600),
+    text(320, 168, 'jointed legs on a chitin exoskeleton — it must moult to grow', 13, 'middle', 'accent'),
+    ...chip(24, 196, 112, 36, 'Insecta', 'accent', 13, 'on'),
+    ...chip(144, 196, 112, 36, 'Arachnida', 'soft', 13),
+    ...chip(264, 196, 112, 36, 'Crustacea', 'accent', 13, 'on'),
+    ...chip(384, 196, 112, 36, 'Myriapoda', 'soft', 13),
+    ...chip(504, 196, 112, 36, 'Merostomata', 'accent', 12, 'on'),
+    text(80, 254, 'butterfly', 11, 'middle', 'muted', 600),
+    text(200, 254, 'spider', 11, 'middle', 'muted', 600),
+    text(320, 254, 'crab', 11, 'middle', 'muted', 600),
+    text(440, 254, 'centipede', 11, 'middle', 'muted', 600),
+    text(560, 254, 'horseshoe crab', 11, 'middle', 'muted', 600),
+  ],
+);
+
 export const STUDY_DIAGRAMS = {
   biomolecules,
   enzymes,
@@ -424,4 +458,5 @@ export const STUDY_DIAGRAMS = {
   agri,
   tissue,
   health,
+  arthropoda,
 } as const;

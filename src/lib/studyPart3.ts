@@ -828,4 +828,143 @@ export const STUDY_PART_3: readonly StudyTopic[] = [
       { label: 'CRISPR bench', hash: 'crispr' },
     ],
   },
+  {
+    id: 'arthropoda',
+    title: 'Phylum Arthropoda',
+    short: 'Arthropods',
+    kicker: 'Jointed legs, hard shell',
+    level: 'FSc Biology, Kingdom Animalia',
+    summary:
+      'Arthropoda is the largest phylum of the animal kingdom, holding about four fifths of all known animal species. Every arthropod has jointed appendages, a chitinous exoskeleton, and a segmented body. The exoskeleton cannot grow, so the animal moults. Blood circulates in an open system, the nerve cord runs along the belly, and the sexes are usually separate.',
+    sections: [
+      {
+        heading: 'Jointed legs and a hard shell',
+        paragraphs: [
+          'Arthropoda is the largest phylum of the animal kingdom, holding about four fifths of all known animal species. Every arthropod has a segmented body, jointed appendages, and a hard exoskeleton made mainly of chitin. The body is bilaterally symmetrical, triploblastic, and coelomate, with a true body cavity that holds the organs.',
+          'The exoskeleton is both armour and skeleton. Muscles attach to its inner surface, and it protects the animal from drying out and from predators. It cannot grow, so the animal must shed it and grow a larger one, a process called ecdysis or moulting. Blood is not carried in closed vessels: the circulatory system is open, and haemolymph bathes the tissues in a cavity called the haemocoel. A double nerve cord runs along the belly, and the sexes are usually separate.',
+        ],
+      },
+      {
+        heading: 'The body plan in three parts',
+        paragraphs: [
+          'Arthropods do not repeat the same segment all the way down the body. Neighbouring segments fuse into functional regions, a pattern called tagmatization. An insect has three regions: head, thorax, and abdomen. In spiders, scorpions, crabs, and prawns the head and thorax fuse into a cephalothorax, followed by an abdomen.',
+          'The jointed appendages are the phylum’s signature, and they are modified for different jobs. Antennae sense the surroundings, mouthparts cut and chew food, walking legs carry the animal, and wings lift insects into the air. The same basic limb, built from jointed segments, becomes a feeler, a jaw, a leg, or a wing depending on where it grows.',
+        ],
+      },
+      {
+        heading: 'Five classes',
+        paragraphs: [
+          'Insecta is the largest class. An insect has three body parts, three pairs of jointed legs, one pair of antennae, and usually one or two pairs of wings. Cockroaches, butterflies, and honeybees are insects. Arachnida has a cephalothorax and an abdomen, four pairs of walking legs, and no antennae: spiders, scorpions, and ticks belong here.',
+          'Crustacea is the mostly aquatic class, with two pairs of antennae and gills for breathing: crabs, prawns, and lobsters. Myriapoda has a long body of many similar segments, each carrying legs: centipedes have one pair of legs per segment, millipedes have two. Merostomata holds only the horseshoe crab, a marine animal whose body plan has changed little for hundreds of millions of years and is called a living fossil.',
+        ],
+      },
+      {
+        heading: 'Growth by moulting',
+        paragraphs: [
+          'A hard exoskeleton cannot stretch, so an arthropod grows in steps. The old cuticle splits, the animal slips out, and a new, larger cuticle hardens around it. This shedding is ecdysis, and the animal is soft and vulnerable until the new shell hardens. Hormones control the timing, and most arthropods moult many times before they reach adult size.',
+          'Many insects also change form as they grow, a process called metamorphosis. In complete metamorphosis the animal passes through egg, larva, pupa, and adult: a butterfly begins as a caterpillar and rebuilds itself inside the pupa. In incomplete metamorphosis there is no pupa: a cockroach hatches as a nymph that looks like a small adult and grows through a series of moults.',
+        ],
+      },
+      {
+        heading: 'Why they matter',
+        paragraphs: [
+          'Arthropods feed us and help us farm. Honeybees pollinate fruit orchards and crops, and their honey is harvested. Silkworms produce silk, lac insects produce shellac, and predatory insects and spiders eat crop pests. Without insect pollinators, many fruit and seed crops would fail.',
+          'The same phylum also causes the most damage. Locusts can strip a field in hours. Mosquitoes carry malaria and dengue, houseflies spread gut infections, and ticks carry disease to people and livestock. Stored grain is eaten by beetles and weevils. Knowing which arthropod you are dealing with is the first step in controlling it, and it is also why the classification in this topic is worth learning.',
+        ],
+      },
+    ],
+    definitions: [
+      { term: 'Arthropoda', meaning: 'The largest animal phylum: animals with jointed appendages, a chitinous exoskeleton, and a segmented body.' },
+      { term: 'Exoskeleton', meaning: 'A hard outer covering that protects the body and gives muscles a surface to pull against.' },
+      { term: 'Chitin', meaning: 'A tough nitrogen-containing polysaccharide that is the main material of the arthropod exoskeleton.' },
+      { term: 'Ecdysis', meaning: 'The shedding of the old exoskeleton so the animal can grow a larger one; also called moulting.' },
+      { term: 'Tagmatization', meaning: 'The fusion of body segments into functional regions such as the head, thorax, and abdomen.' },
+      { term: 'Metamorphosis', meaning: 'A change of body form during growth, as from larva to pupa to adult in a butterfly.' },
+      { term: 'Cephalothorax', meaning: 'The fused head and thorax of arachnids and crustaceans, followed by an abdomen.' },
+      {
+        term: 'Open circulatory system',
+        meaning: 'A system in which blood, called haemolymph, leaves vessels and bathes the tissues in a body cavity.',
+      },
+      { term: 'Antenna', meaning: 'A jointed sensory appendage on the head, used for touch, smell, and sometimes taste.' },
+      { term: 'Vector', meaning: 'An animal that carries a disease-causing organism from one host to another, such as a mosquito.' },
+    ],
+    worked: {
+      title: 'Identify the class',
+      prompt:
+        'An animal with a body in three parts, three pairs of jointed legs, one pair of antennae, and two pairs of wings is found on a flower. Which class is it, and how do you know?',
+      steps: [
+        'Count the body regions. Head, thorax, and abdomen in three parts points to an insect: arachnids and crustaceans have a cephalothorax instead.',
+        'Count the legs. Three pairs of walking legs is the insect number. A spider would have four pairs.',
+        'Count the antennae. One pair is the insect pattern; crustaceans have two pairs and arachnids have none.',
+        'Check the wings. Two pairs of wings confirm an insect, and on a flower the animal is most likely a butterfly or a bee feeding on nectar.',
+      ],
+      result:
+        'Insecta, most likely a butterfly or a honeybee. Contrast it with a spider: two body parts, four pairs of legs, and no antennae, which is Arachnida.',
+    },
+    pakistan: {
+      title: 'Locusts, dengue, and honeybees in Pakistan',
+      body:
+        'Desert locust swarms in 2020 damaged crops across Sindh and Punjab, and the same phylum brings a yearly health threat: the Aedes aegypti mosquito spreads dengue in the cities of Punjab and Sindh every monsoon. The other side of the phylum is a livelihood. Apiculture, honeybee farming, in the northern areas produces honey and pollinates orchards, so one phylum is both a threat to the harvest and a source of income.',
+    },
+    keyPoints: [
+      'Arthropoda is the largest animal phylum, with about 80% of all known animal species.',
+      'Jointed appendages and a chitinous exoskeleton define the phylum.',
+      'The exoskeleton cannot grow, so the animal must moult to get bigger.',
+      'Blood circulates in an open system, and the nerve cord runs along the belly.',
+      'Five classes: Insecta, Arachnida, Crustacea, Myriapoda, and Merostomata.',
+      'Arthropods are pollinators and producers of honey and silk, and also pests and disease vectors.',
+    ],
+    quiz: [
+      q(
+        'What is the arthropod exoskeleton made of?',
+        [
+          'Chitin, a tough nitrogen-containing polysaccharide',
+          'Cellulose, like a plant cell wall',
+          'Calcium carbonate, like a mollusc shell',
+          'Keratin, like a bird feather',
+        ],
+        0,
+        'Chitin is the defining material of the arthropod cuticle. Crustaceans harden it further with calcium salts, but the base material is chitin, not cellulose or keratin.',
+      ),
+      q(
+        'How many pairs of walking legs does an arachnid have?',
+        ['Four pairs', 'Three pairs', 'Two pairs', 'Five pairs'],
+        0,
+        'Arachnids have four pairs of walking legs and no antennae. Three pairs of legs with one pair of antennae is the insect pattern, and two pairs of antennae is the crustacean pattern.',
+      ),
+      q(
+        'Which class has two pairs of antennae?',
+        ['Crustacea', 'Insecta', 'Arachnida', 'Myriapoda'],
+        0,
+        'Crustaceans such as crabs and prawns have two pairs of antennae. Insects have one pair, arachnids have none, and myriapods have one pair.',
+      ),
+      q(
+        'What is ecdysis?',
+        [
+          'Shedding the exoskeleton so the animal can grow',
+          'Changing sex during the breeding season',
+          'Losing the wings after mating',
+          'Forming a cocoon from silk',
+        ],
+        0,
+        'The exoskeleton cannot stretch, so the animal sheds it and grows a larger one. The soft new cuticle hardens after the moult.',
+      ),
+    ],
+    shorts: [
+      {
+        prompt: 'Why must an arthropod moult to grow?',
+        answer:
+          'The exoskeleton is a hard shell of chitin, and a hard shell cannot stretch. An animal inside it can only grow by shedding the old cuticle and expanding a new, soft one before it hardens. That shedding is ecdysis. Hormones trigger it, and the animal is soft and defenceless until the new shell sets. Most arthropods moult several times, and insects that metamorphose also change their body form between moults.',
+      },
+      {
+        prompt: 'How do you tell an insect from a spider at a glance?',
+        answer:
+          'Count the body parts and the legs. An insect has three body parts, head, thorax, and abdomen, with three pairs of legs and one pair of antennae, and it often has wings. A spider has two body parts, a cephalothorax and an abdomen, with four pairs of legs and no antennae at all. Three body parts and six legs means insect; two body parts and eight legs means spider, which is an arachnid, not an insect.',
+      },
+    ],
+    related: [
+      { label: 'Evolution', hash: 'study/evolution' },
+      { label: 'Health biotechnology', hash: 'study/health' },
+    ],
+  },
 ];

@@ -19,6 +19,7 @@ export const STUDY_TOPIC_IDS = [
   'agri',
   'tissue',
   'health',
+  'arthropoda',
 ] as const;
 
 export type StudyTopicId = (typeof STUDY_TOPIC_IDS)[number];
