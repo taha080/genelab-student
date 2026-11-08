@@ -82,6 +82,8 @@ export function mountProgress(root: HTMLElement): () => void {
       glycolysis: 'Glycolysis',
       glycogenolysis: 'Glycogen',
       pentose: 'Pentose',
+      urea: 'Urea cycle',
+      betaox: 'Beta-oxidation',
       oxphos: 'Oxphos',
     };
     const lessonRow = el('div', 'stats');

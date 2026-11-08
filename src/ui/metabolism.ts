@@ -35,7 +35,7 @@ export function mountMetabolism(root: HTMLElement): () => void {
     el(
       'p',
       'explain',
-      'Six metabolism lessons: a pathway map, ATP and phosphoryl transfer, glycolysis, glycogen breakdown, the pentose phosphate pathway, and oxidative phosphorylation. The citric acid cycle and gluconeogenesis stay on the Biochemistry tab and are linked from the map.',
+      'Eight metabolism lessons: a pathway map, ATP and phosphoryl transfer, glycolysis, glycogen breakdown, the pentose phosphate pathway, the urea cycle, beta-oxidation, and oxidative phosphorylation. The citric acid cycle and gluconeogenesis stay on the Biochemistry tab and are linked from the map.',
     ),
   );
   const nav = el('div', 'segment');
@@ -489,6 +489,8 @@ function shortLabel(id: MetabolismLessonId): string {
     glycolysis: 'Glycolysis',
     glycogenolysis: 'Glycogen',
     pentose: 'Pentose phosphate',
+    urea: 'Urea cycle',
+    betaox: 'Beta-oxidation',
     oxphos: 'Oxphos',
   };
   return labels[id];
