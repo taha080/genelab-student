@@ -819,6 +819,7 @@ details.calc p { max-width: 70rem; }
     grid-template-areas:
       "store spine currency"
       "side spine cycle"
+      "urea spine betaox"
       "rebuild chain chain";
   }
   .place-store { grid-area: store; }
@@ -828,6 +829,8 @@ details.calc p { max-width: 70rem; }
   .place-cycle { grid-area: cycle; }
   .place-chain { grid-area: chain; }
   .place-rebuild { grid-area: rebuild; }
+  .place-urea { grid-area: urea; }
+  .place-betaox { grid-area: betaox; }
 }
 
 .map-node {
