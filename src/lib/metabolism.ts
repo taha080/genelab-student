@@ -3,6 +3,8 @@
  * textbook figures (Lehninger-style). They are for study, not a lab protocol.
  */
 
+import { krebsTotals } from './biochem';
+
 export const METABOLISM_LESSON_IDS = ['intro', 'atp', 'glycolysis', 'glycogenolysis', 'pentose', 'urea', 'betaox', 'oxphos'] as const;
 export type MetabolismLessonId = (typeof METABOLISM_LESSON_IDS)[number];
 
@@ -661,6 +663,44 @@ export function protonsPumped(entry: 'nadh' | 'succinate'): number {
   return OXPHOS.filter((step) => ids.includes(step.id)).reduce((sum, step) => sum + (step.protons ?? 0), 0);
 }
 
+export interface GlucoseOxidationYield {
+  glycolysis: { atp: number; nadh: number };
+  pdh: { nadh: number };
+  krebs: { nadh: number; fadh2: number; gtp: number };
+  etc: { nadh: number; fadh2: number };
+  atp: number;
+  energyKj: number;
+  efficiencyPct: number;
+}
+
+/** Complete oxidation of one glucose: ΔG°′ is about −2870 kJ/mol. */
+export const GLUCOSE_OXIDATION_DG_KJ = -2870;
+
+/**
+ * Total ATP from complete oxidation of one glucose, modern P/O ratios
+ * (2.5 ATP per NADH, 1.5 per FADH₂). The malate–aspartate shuttle carries
+ * cytosolic NADH into the matrix as NADH: 32 ATP. The glycerol-phosphate
+ * shuttle carries it in as FADH₂: 30 ATP. Older integer P/O ratios
+ * (3 for NADH, 2 for FADH₂) give 38 ATP.
+ */
+export function glucoseOxidationYield(shuttle: 'malate' | 'glycerol'): GlucoseOxidationYield {
+  const glycolysis = glycolysisYield();
+  const krebsPerTurn = krebsTotals();
+  const krebs = { nadh: krebsPerTurn.nadh * 2, fadh2: krebsPerTurn.fadh2 * 2, gtp: krebsPerTurn.gtp * 2 };
+  const pdh = { nadh: 2 };
+  const cytosolicAsNadh = shuttle === 'malate' ? glycolysis.nadh : 0;
+  const cytosolicAsFadh2 = shuttle === 'glycerol' ? glycolysis.nadh : 0;
+  const etc = {
+    nadh: cytosolicAsNadh + pdh.nadh + krebs.nadh,
+    fadh2: krebs.fadh2 + cytosolicAsFadh2,
+  };
+  const atp =
+    glycolysis.atp + krebs.gtp + etc.nadh * PO_RATIO.nadh + etc.fadh2 * PO_RATIO.succinate;
+  const energyKj = Math.round(atp * -ATP_TO_ADP_KJ);
+  const efficiencyPct = Math.round((energyKj / -GLUCOSE_OXIDATION_DG_KJ) * 100);
+  return { glycolysis: { atp: glycolysis.atp, nadh: glycolysis.nadh }, pdh, krebs, etc, atp, energyKj, efficiencyPct };
+}
+
 export const OXPHOS_AGENTS = [
   { id: 'rotenone', name: 'Rotenone', target: 'Complex I', kind: 'inhibitor' as const, effect: 'Blocks electron transfer from Complex I to ubiquinone. NADH oxidation stops. Succinate can still reduce Q.' },
   { id: 'malonate', name: 'Malonate', target: 'Complex II', kind: 'inhibitor' as const, effect: 'Competes with succinate. It does not stop NADH oxidation.' },
@@ -907,6 +947,17 @@ export const METABOLISM_LESSONS: readonly MetabolismLesson[] = [
         0,
         'Red cells have no mitochondria. Lactate dehydrogenase regenerates the NAD⁺ that GAPDH needs. Ethanol fermentation is the yeast route.',
       ),
+      quiz(
+        'Why does the glycerol-phosphate shuttle give 30 ATP from glucose instead of 32?',
+        [
+          'Cytosolic NADH enters as FADH₂, worth 1.5 ATP instead of 2.5',
+          'Glycolysis nets no ATP when the shuttle runs',
+          'The citric acid cycle makes no GTP with this shuttle',
+          'Pyruvate dehydrogenase is skipped',
+        ],
+        0,
+        'The shuttle moves the electrons of cytosolic NADH onto mitochondrial FAD. Two cytosolic NADH are then worth 3 ATP instead of 5, so the total falls from 32 to 30.',
+      ),
     ],
   },
   {
@@ -1096,6 +1147,12 @@ export const METABOLISM_LESSONS: readonly MetabolismLesson[] = [
         ],
         0,
         'The gradient is spent as heat. Electron transport is released from respiratory control, but ATP synthase no longer has a gradient to use. Oligomycin, by contrast, blocks the synthase itself.',
+      ),
+      quiz(
+        'How many ATP does complete oxidation of one glucose give with the malate–aspartate shuttle?',
+        ['32', '30', '38', '8'],
+        0,
+        'Glycolysis nets 2 ATP and 2 cytosolic NADH, pyruvate dehydrogenase makes 2 NADH, and two citric acid cycle turns make 6 NADH, 2 FADH₂, and 2 GTP. With the malate–aspartate shuttle the 10 NADH give 25 ATP and the 2 FADH₂ give 3 ATP, plus 4 substrate-level ATP: 32 in total. The glycerol-phosphate shuttle gives 30, and older integer P/O ratios gave 38.',
       ),
     ],
   },
