@@ -13,6 +13,7 @@ import {
   canPhosphorylateAdp,
   coupledFreeEnergy,
   gradeLesson,
+  glucoseOxidationYield,
   glycolysisYield,
   lessonFromHash,
   metabolismLesson,
@@ -308,10 +309,22 @@ function couplingNote(): HTMLElement {
 
 function glycolysisSummary(): HTMLElement {
   const yield_ = glycolysisYield();
+  const malate = glucoseOxidationYield('malate');
+  const glycerol = glucoseOxidationYield('glycerol');
   const panel = el('section', 'panel');
   const chips = el('div', 'stats');
   chips.append(statChip('Net ATP', String(yield_.atp)), statChip('NADH', String(yield_.nadh)), statChip('Pyruvate', String(yield_.pyruvate)));
-  panel.append(el('h3', undefined, 'Per glucose'), chips, el('p', undefined, GLYCOLYSIS_NET), el('p', undefined, 'Steps 1–5 are the investment. Steps 6–10 are the payoff, and each runs twice because both trioses continue.'));
+  panel.append(
+    el('h3', undefined, 'Per glucose'),
+    chips,
+    el('p', undefined, GLYCOLYSIS_NET),
+    el('p', undefined, 'Steps 1–5 are the investment. Steps 6–10 are the payoff, and each runs twice because both trioses continue.'),
+    el(
+      'p',
+      undefined,
+      `The 2 cytosolic NADH are worth ${2 * PO_RATIO.nadh} ATP through the malate–aspartate shuttle or ${2 * PO_RATIO.succinate} ATP through the glycerol-phosphate shuttle, for a complete-oxidation total of ${malate.atp} or ${glycerol.atp} ATP. The oxidative phosphorylation page works it out.`,
+    ),
+  );
   return panel;
 }
 
@@ -385,11 +398,39 @@ function oxphosSummary(): HTMLElement {
   }
   const scroll = el('div', 'table-scroll');
   scroll.append(table);
+  const total = glucoseOxidationYield('malate');
+  const totalGlycerol = glucoseOxidationYield('glycerol');
+  const energy = el('table', 'compare');
+  const energyHead = el('tr');
+  energyHead.append(el('th', undefined, 'Stage'), el('th', undefined, 'What it makes'), el('th', undefined, 'ATP'));
+  energy.append(energyHead);
+  const energyRows: [string, string, string][] = [
+    ['Glycolysis (net)', '2 ATP + 2 NADH in the cytosol', String(total.glycolysis.atp)],
+    ['Pyruvate dehydrogenase (×2)', '2 NADH', String(total.pdh.nadh * PO_RATIO.nadh)],
+    ['Citric acid cycle (×2)', '6 NADH + 2 FADH₂ + 2 GTP', String(total.krebs.nadh * PO_RATIO.nadh + total.krebs.fadh2 * PO_RATIO.succinate + total.krebs.gtp)],
+    ['Shuttle (malate–aspartate)', '2 cytosolic NADH enter as NADH', String(total.glycolysis.nadh * PO_RATIO.nadh)],
+    ['Total, malate–aspartate shuttle', '10 NADH + 2 FADH₂ through the chain', String(total.atp)],
+    ['Total, glycerol-phosphate shuttle', '2 cytosolic NADH enter as FADH₂', String(totalGlycerol.atp)],
+  ];
+  for (const [stage, makes, atp] of energyRows) {
+    const row = el('tr');
+    row.append(el('td', undefined, stage), el('td', undefined, makes), el('td', undefined, atp));
+    energy.append(row);
+  }
+  const energyScroll = el('div', 'table-scroll');
+  energyScroll.append(energy);
   panel.append(
     el('h3', undefined, 'Protons, P/O, and blockers'),
     chips,
     el('p', undefined, 'The proton counts are the pumped protons: 4 from Complex I, 4 from Complex III, and 2 from Complex IV per 2 electrons. Succinate skips the 4 from Complex I. These agents are classroom landmarks, not a procedure.'),
     scroll,
+    el('h3', undefined, 'Total energy from one glucose'),
+    energyScroll,
+    el(
+      'p',
+      undefined,
+      `Electron transport makes ${total.etc.nadh * PO_RATIO.nadh} ATP from the ${total.etc.nadh} NADH and ${total.etc.fadh2 * PO_RATIO.succinate} ATP from the ${total.etc.fadh2} FADH₂; the other 4 ATP are substrate-level (2 from glycolysis, 2 GTP). One glucose releases about 2870 kJ/mol; ${total.atp} ATP capture about ${total.energyKj} kJ/mol, roughly ${total.efficiencyPct}% efficient. Older textbooks used P/O ratios of 3 and 2, giving 38 ATP.`,
+    ),
   );
   return panel;
 }
