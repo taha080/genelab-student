@@ -78,7 +78,7 @@ export const LESSONS: readonly Lesson[] = [
   { tool: 'animation', title: 'Animation', detail: 'Step through the helix, transcription, or translation.' },
   { tool: 'sequences', title: 'Sequence tools', detail: 'Reverse-complement, cut, find an ORF, or align two sequences.' },
   { tool: 'biochem', title: 'Biochemistry', detail: 'Amino acids, enzyme kinetics, the citric acid cycle, and gluconeogenesis.' },
-  { tool: 'metabolism', title: 'Metabolism lessons', detail: 'ATP, glycolysis, glycogen, the pentose phosphate pathway, and oxidative phosphorylation.' },
+  { tool: 'metabolism', title: 'Metabolism lessons', detail: 'ATP, glycolysis, glycogen, the pentose phosphate pathway, the urea cycle, beta-oxidation, and oxidative phosphorylation.' },
   { tool: 'study', title: 'Study topics', detail: 'Biomolecules, the cell, genetics, and the biotechnology chapters.' },
   { tool: 'assignment', title: 'AI Assignment Maker', detail: 'Draft an assignment with your own free Groq key.' },
   { tool: 'quiz', title: 'Quiz', detail: 'Finish a quiz round.' },

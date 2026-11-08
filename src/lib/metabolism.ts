@@ -3,7 +3,7 @@
  * textbook figures (Lehninger-style). They are for study, not a lab protocol.
  */
 
-export const METABOLISM_LESSON_IDS = ['intro', 'atp', 'glycolysis', 'glycogenolysis', 'pentose', 'oxphos'] as const;
+export const METABOLISM_LESSON_IDS = ['intro', 'atp', 'glycolysis', 'glycogenolysis', 'pentose', 'urea', 'betaox', 'oxphos'] as const;
 export type MetabolismLessonId = (typeof METABOLISM_LESSON_IDS)[number];
 
 export interface LessonQuiz {
@@ -125,6 +125,8 @@ export const MAP_LINKS: readonly MapLink[] = [
   { id: 'glycogenolysis', title: 'Glycogenolysis', hash: 'metabolism/glycogenolysis', blurb: 'Liver and muscle release glucose units from glycogen.', place: 'store' },
   { id: 'glycolysis', title: 'Glycolysis', hash: 'metabolism/glycolysis', blurb: 'Glucose to two pyruvate in the cytosol.', place: 'spine' },
   { id: 'pentose', title: 'Pentose phosphate', hash: 'metabolism/pentose', blurb: 'NADPH and ribose 5-phosphate from glucose 6-phosphate.', place: 'side' },
+  { id: 'urea', title: 'Urea cycle', hash: 'metabolism/urea', blurb: 'Ammonia to urea in the liver: 4 high-energy phosphates.', place: 'urea' },
+  { id: 'betaox', title: 'Beta-oxidation', hash: 'metabolism/betaox', blurb: 'Fatty acids to acetyl-CoA, one two-carbon turn at a time.', place: 'betaox' },
   { id: 'atp', title: 'ATP', hash: 'metabolism/atp', blurb: 'Phosphoryl transfer, coupling, and substrate-level phosphorylation.', place: 'currency' },
   { id: 'krebs', title: 'Citric acid cycle', hash: 'biochem/krebs', blurb: 'Acetyl-CoA to 3 NADH, 1 FADH₂, 1 GTP, and 2 CO₂.', place: 'cycle' },
   { id: 'oxphos', title: 'Oxidative phosphorylation', hash: 'metabolism/oxphos', blurb: 'The respiratory chain and ATP synthase.', place: 'chain' },
@@ -469,6 +471,114 @@ export const PENTOSE_RECYCLE = {
   fructose6p: 2,
   glyceraldehyde3p: 1,
 } as const;
+
+export const UREA_CYCLE: readonly PathStep[] = [
+  {
+    id: 'cps1',
+    step: 1,
+    title: 'Carbamoyl phosphate',
+    enzyme: 'Carbamoyl phosphate synthetase I',
+    phase: 'Mitochondrion',
+    conversion: 'NH₄⁺ + HCO₃⁻ + 2 ATP → carbamoyl phosphate + 2 ADP + Pi',
+    energy: 'Costs 2 ATP. Rate-limiting step.',
+    regulation: 'Needs N-acetylglutamate (made by NAGS, switched on by arginine).',
+    detail: 'Mitochondrial. Ammonia is fixed into carbamoyl phosphate so it can enter the cycle.',
+  },
+  {
+    id: 'otc',
+    step: 2,
+    title: 'Citrulline',
+    enzyme: 'Ornithine transcarbamoylase',
+    phase: 'Mitochondrion',
+    conversion: 'Carbamoyl phosphate + ornithine → citrulline + Pi',
+    energy: 'No ATP.',
+    regulation: 'Most common urea-cycle defect is OTC deficiency (X-linked).',
+    detail: 'Mitochondrial. Citrulline leaves the mitochondrion for the cytosol.',
+  },
+  {
+    id: 'ass',
+    step: 3,
+    title: 'Argininosuccinate',
+    enzyme: 'Argininosuccinate synthetase',
+    phase: 'Cytosol',
+    conversion: 'Citrulline + aspartate + ATP → argininosuccinate + AMP + PPi',
+    energy: 'ATP to AMP costs 2 high-energy phosphates.',
+    regulation: 'Aspartate brings the second nitrogen.',
+    detail: 'Cytosolic. Aspartate is the nitrogen donor from amino-acid catabolism.',
+  },
+  {
+    id: 'asl',
+    step: 4,
+    title: 'Arginine + fumarate',
+    enzyme: 'Argininosuccinate lyase',
+    phase: 'Cytosol',
+    conversion: 'Argininosuccinate → arginine + fumarate',
+    energy: 'No ATP.',
+    regulation: 'Fumarate links the cycle to the citric acid cycle.',
+    detail: 'Cytosolic. Fumarate is hydrated to malate and then oxidised to oxaloacetate, which can make more aspartate.',
+  },
+  {
+    id: 'arginase',
+    step: 5,
+    title: 'Urea + ornithine',
+    enzyme: 'Arginase',
+    phase: 'Cytosol',
+    conversion: 'Arginine + H₂O → urea + ornithine',
+    energy: 'No ATP. Urea leaves in blood to the kidney.',
+    regulation: 'Ornithine returns to the mitochondrion to start again.',
+    detail: 'Cytosolic. Only the liver has the full cycle, so only the liver makes urea.',
+  },
+];
+
+export const BETA_OXIDATION: readonly PathStep[] = [
+  {
+    id: 'acad',
+    step: 1,
+    title: 'Oxidation',
+    enzyme: 'Acyl-CoA dehydrogenase',
+    phase: 'One cycle',
+    conversion: 'Acyl-CoA + FAD → trans-Δ²-enoyl-CoA + FADH₂',
+    energy: '1 FADH₂ per cycle.',
+    regulation: 'First oxidation; FAD is the acceptor.',
+    detail: 'Makes the trans double bond between C2 and C3.',
+  },
+  {
+    id: 'ech',
+    step: 2,
+    title: 'Hydration',
+    enzyme: 'Enoyl-CoA hydratase',
+    phase: 'One cycle',
+    conversion: 'trans-Δ²-enoyl-CoA + H₂O → L-3-hydroxyacyl-CoA',
+    energy: 'No redox cofactor.',
+    regulation: 'Adds water across the double bond.',
+    detail: 'Only the L isomer is formed, ready for the next oxidation.',
+  },
+  {
+    id: 'hadh',
+    step: 3,
+    title: 'Oxidation',
+    enzyme: '3-Hydroxyacyl-CoA dehydrogenase',
+    phase: 'One cycle',
+    conversion: 'L-3-hydroxyacyl-CoA + NAD⁺ → 3-ketoacyl-CoA + NADH + H⁺',
+    energy: '1 NADH per cycle.',
+    regulation: 'NAD⁺ is the acceptor.',
+    detail: 'The hydroxyl becomes a keto group on C3.',
+  },
+  {
+    id: 'thiolase',
+    step: 4,
+    title: 'Thiolysis',
+    enzyme: 'Beta-ketothiolase',
+    phase: 'One cycle',
+    conversion: '3-ketoacyl-CoA + CoA → acetyl-CoA + shortened acyl-CoA',
+    energy: 'No redox cofactor. The chain shortens by 2 carbons.',
+    regulation: 'The shortened acyl-CoA re-enters step 1.',
+    detail: 'One acetyl-CoA leaves each turn; the cycle repeats until the chain is gone.',
+  },
+];
+
+/** Palmitate (C16) with modern P/O ratios (2.5 per NADH, 1.5 per FADH₂), after the 2-phosphate activation cost. */
+export const BETA_OX_PALMITATE = { cycles: 7, acetylCoA: 8, fadh2: 7, nadh: 7, atp: 106 } as const;
 
 export const OXPHOS: readonly PathStep[] = [
   {
@@ -867,6 +977,87 @@ export const METABOLISM_LESSONS: readonly MetabolismLesson[] = [
         ['Thiamine pyrophosphate, two carbons', 'Biotin, one carbon', 'Pyridoxal phosphate, an amino group', 'NAD⁺, a hydride'],
         0,
         'Transketolase transfers a two-carbon unit and needs thiamine pyrophosphate. Transaldolase transfers three carbons and uses a lysine, not thiamine.',
+      ),
+    ],
+  },
+  {
+    id: 'urea',
+    title: 'Urea cycle',
+    kicker: 'Nitrogen out, safely',
+    summary: 'The liver turns toxic ammonia into urea in five steps: two in the mitochondrion, three in the cytosol. One urea costs 3 ATP — 2 to ADP and 1 to AMP — which is 4 high-energy phosphates. Overall: NH₄⁺ + HCO₃⁻ + aspartate + 3 ATP + H₂O → urea + fumarate + 2 ADP + AMP + 2 Pi + PPi.',
+    steps: UREA_CYCLE,
+    quiz: [
+      quiz(
+        'Which enzyme is the rate-limiting step of the urea cycle, and what switches it on?',
+        [
+          'Carbamoyl phosphate synthetase I, switched on by N-acetylglutamate',
+          'Arginase, switched on by ornithine',
+          'Ornithine transcarbamoylase, switched on by ATP',
+          'Argininosuccinate lyase, switched on by fumarate',
+        ],
+        0,
+        'CPS-I is the committed step. N-acetylglutamate, made by NAGS and raised by arginine, is its allosteric activator.',
+      ),
+      quiz(
+        'Which steps of the urea cycle run in the mitochondrion?',
+        [
+          'Steps 1–2: carbamoyl phosphate and citrulline',
+          'Steps 3–5: argininosuccinate to urea',
+          'Only step 5: arginase',
+          'All five steps',
+        ],
+        0,
+        'CPS-I and OTC are mitochondrial. Citrulline crosses to the cytosol, where steps 3–5 run.',
+      ),
+      quiz(
+        'How many high-energy phosphates does one urea cost?',
+        ['4', '2', '3', '6'],
+        0,
+        'Two ATP are spent to ADP and one ATP to AMP plus pyrophosphate. ATP to AMP costs two phosphates, so the total is 4.',
+      ),
+      quiz(
+        'Which intermediate links the urea cycle to the citric acid cycle?',
+        ['Fumarate', 'Ornithine', 'Citrulline', 'Carbamoyl phosphate'],
+        0,
+        'Argininosuccinate lyase releases fumarate, which is hydrated to malate and oxidised to oxaloacetate. Oxaloacetate can be transaminated back to aspartate.',
+      ),
+    ],
+  },
+  {
+    id: 'betaox',
+    title: 'Beta-oxidation',
+    kicker: 'Fatty acids to acetyl-CoA',
+    summary: 'In the mitochondrion, a fatty acyl-CoA loses two carbons per turn through the same four steps: oxidation, hydration, oxidation, thiolysis. Each turn gives 1 FADH₂, 1 NADH, and 1 acetyl-CoA. Palmitate (C16) needs 7 turns and nets 106 ATP. Activation costs ATP to AMP, and the carnitine shuttle (CPT-I, blocked by malonyl-CoA) carries long chains inside. Odd chains end as propionyl-CoA, which becomes succinyl-CoA.',
+    steps: BETA_OXIDATION,
+    quiz: [
+      quiz(
+        'What is the order of the four steps in one beta-oxidation turn?',
+        [
+          'Oxidation, hydration, oxidation, thiolysis',
+          'Hydration, oxidation, thiolysis, oxidation',
+          'Thiolysis, oxidation, hydration, oxidation',
+          'Oxidation, thiolysis, hydration, oxidation',
+        ],
+        0,
+        'Acyl-CoA dehydrogenase oxidises, enoyl-CoA hydratase adds water, 3-hydroxyacyl-CoA dehydrogenase oxidises again, and thiolase cuts off acetyl-CoA.',
+      ),
+      quiz(
+        'How many ATP does palmitate (C16) net, after the activation cost?',
+        ['106', '108', '129', '96'],
+        0,
+        'Eight acetyl-CoA give 80 ATP, 7 NADH give 17.5, and 7 FADH₂ give 10.5, which is 108. Activation spends ATP to AMP, two phosphates, so the net is 106.',
+      ),
+      quiz(
+        'What inhibits CPT-I, the carnitine shuttle entry step?',
+        ['Malonyl-CoA', 'Acetyl-CoA', 'Carnitine', 'NADH'],
+        0,
+        'Malonyl-CoA, the first product of fatty-acid synthesis, blocks CPT-I so the cell does not oxidise fat while it is making fat.',
+      ),
+      quiz(
+        'What does one turn of beta-oxidation yield?',
+        ['1 FADH₂, 1 NADH, and 1 acetyl-CoA', '2 ATP and 1 FADH₂', '1 NADH and 2 acetyl-CoA', '1 GTP and 1 FADH₂'],
+        0,
+        'The two oxidations give one FADH₂ and one NADH. Thiolysis releases one acetyl-CoA and leaves the chain two carbons shorter.',
       ),
     ],
   },
